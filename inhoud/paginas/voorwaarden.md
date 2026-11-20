@@ -38,7 +38,7 @@ Je kunt je account altijd laten verwijderen via [info@digitaalgemeengoed.nl](mai
 
 ## Wijzigingen
 
-Wij kunnen deze voorwaarden wijzigen. Bij een belangrijke wijziging vragen we je bij de volgende keer inloggen opnieuw akkoord te gaan. Elke versie is terug te vinden in de [geschiedenis van dit bestand op GitHub](https://github.com/digitaalgemeengoed/gemeenschap/commits/main/inhoud/paginas/voorwaarden.md).
+Wij kunnen deze voorwaarden wijzigen. Bij een belangrijke wijziging vragen we je bij de volgende keer inloggen opnieuw akkoord te gaan. Elke versie is terug te vinden in de [geschiedenis van dit bestand op GitHub](https://github.com/Digitaal-Gemeengoed/gemeenschap/commits/main/inhoud/paginas/voorwaarden.md).
 
 ## Geen garantie
 

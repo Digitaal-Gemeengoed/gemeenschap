@@ -102,7 +102,7 @@ dc run --rm -T wiki-inrichten || stop "Kennisbank inrichten mislukt; kijk in de 
 if ! grep -qE '^KENNISBANK_REPO=.+' .env; then
   waarschuw "De pagina's van de kennisbank gaan nog niet naar GitHub. Zet deze sleutel als deploy key (met schrijfrechten) bij de repo kennisbank:"
   printf '      %s\n' "$(cat "$DG_MAP/geheimen/kennisbank.pub")"
-  waarschuw "en zet daarna KENNISBANK_REPO=git@github.com:digitaalgemeengoed/kennisbank.git in .env (README, Kennisbank)."
+  waarschuw "en zet daarna KENNISBANK_REPO=git@github.com:Digitaal-Gemeengoed/kennisbank.git in .env (README, Kennisbank)."
 fi
 
 wacht "WordPress" 36 wordpress_klaar || stop "WordPress start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs wordpress"

@@ -83,4 +83,4 @@ Ben je het niet eens met hoe we met je gegevens omgaan, dan kun je een klacht in
 
 ## Wijzigingen
 
-Elke versie van deze verklaring is terug te vinden in de [geschiedenis van dit bestand op GitHub](https://github.com/digitaalgemeengoed/gemeenschap/commits/main/inhoud/paginas/privacy.md).
+Elke versie van deze verklaring is terug te vinden in de [geschiedenis van dit bestand op GitHub](https://github.com/Digitaal-Gemeengoed/gemeenschap/commits/main/inhoud/paginas/privacy.md).

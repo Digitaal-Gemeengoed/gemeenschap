@@ -8,7 +8,7 @@ set -euo pipefail
 DG_MAP="${DG_MAP:-/opt/gemeenschap}"
 DG_STAAT="${DG_STAAT:-/var/lib/dg-gemeenschap}"
 # shellcheck disable=SC2034  # gebruikt in de scripts die dit inlezen
-DG_REPO="${DG_REPO:-https://github.com/digitaalgemeengoed/gemeenschap}"
+DG_REPO="${DG_REPO:-https://github.com/Digitaal-Gemeengoed/gemeenschap}"
 COMPOSE=compose.yml
 
 meld()     { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }

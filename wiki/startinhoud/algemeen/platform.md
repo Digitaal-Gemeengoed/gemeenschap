@@ -16,7 +16,7 @@ Op het platform komt het werk van het netwerk samen. Je logt overal in met **het
 | Projecten | [projecten.digitaalgemeengoed.nl](https://projecten.digitaalgemeengoed.nl) (Redmine) | meldingen, wensen, roadmap, fase per project | **openbaar** |
 | Kennisbank | kennis.digitaalgemeengoed.nl (deze wiki) | handleidingen, ervaringen, uitleg | ingelogde leden |
 | Architectuurmodellen | [architectuur.digitaalgemeengoed.nl](https://architectuur.digitaalgemeengoed.nl) | ArchiMate-modellen per project | ingelogde leden |
-| Code | [github.com/digitaalgemeengoed](https://github.com/digitaalgemeengoed) | broncode, ook van de site zelf | openbaar (de kennisbank-repo is besloten) |
+| Code | [github.com/Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed) | broncode, ook van de site zelf | openbaar (de kennisbank-repo is besloten) |
 
 ## Werkgroepen
 

@@ -26,7 +26,7 @@ Wat de assistent voorstelt, beslist de medewerker. De beheerder van de gemeente 
 
 De Office Assistent is een **prototype**. Je kunt hem uitproberen, maar gebruik er nog geen echte persoonsgegevens of vertrouwelijke stukken mee. We zoeken gemeenten die willen meedenken en meetesten.
 
-- De code staat op [GitHub](https://github.com/digitaalgemeengoed).
+- De code staat op [GitHub](https://github.com/Digitaal-Gemeengoed).
 - Bevindingen en wensen meld je in [Redmine](https://projecten.digitaalgemeengoed.nl/projects/office-assistent).
 - Vragen stel je in het forum *Office Assistent*.
 

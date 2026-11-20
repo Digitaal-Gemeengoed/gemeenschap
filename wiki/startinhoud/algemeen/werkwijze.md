@@ -20,7 +20,7 @@ Een idee begint meestal in het forum *Besluitvorming* of als wens in Redmine.
 
 - Architectuur en ontwerp, passend in Common Ground. Het model komt in een eigen repo en is te zien op [architectuur.digitaalgemeengoed.nl](https://architectuur.digitaalgemeengoed.nl).
 - Ontwerpen die duur zijn om te bouwen, werken we eerst uit op papier: een ontwerpdocument met de keuzes en wat ertegen pleit.
-- Ontwikkeling met tests en versies, open source onder de EUPL, in de repo's op [GitHub](https://github.com/digitaalgemeengoed).
+- Ontwikkeling met tests en versies, open source onder de EUPL, in de repo's op [GitHub](https://github.com/Digitaal-Gemeengoed).
 
 ## 3. Pilot en invoering
 

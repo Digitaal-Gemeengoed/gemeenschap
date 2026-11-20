@@ -6,7 +6,7 @@ labels: algemeen, github, bijdragen
 
 # Bijdragen
 
-Alles wat het netwerk maakt, staat op [GitHub](https://github.com/digitaalgemeengoed), onder de EUPL 1.2: de software, de site en de inrichting van het platform.
+Alles wat het netwerk maakt, staat op [GitHub](https://github.com/Digitaal-Gemeengoed), onder de EUPL 1.2: de software, de site en de inrichting van het platform.
 
 ## Aan de code
 
@@ -24,7 +24,7 @@ Afspraken:
 
 ## Aan de site
 
-De pagina's van digitaalgemeengoed.nl staan als Markdown in de repo [gemeenschap](https://github.com/digitaalgemeengoed/gemeenschap/tree/main/inhoud). In WordPress zie je bij elke pagina de link **Bewerken op GitHub**.
+De pagina's van digitaalgemeengoed.nl staan als Markdown in de repo [gemeenschap](https://github.com/Digitaal-Gemeengoed/gemeenschap/tree/main/inhoud). In WordPress zie je bij elke pagina de link **Bewerken op GitHub**.
 
 1. Open het bestand op GitHub en klik op het potlood.
 2. Wijzig de tekst. Met **Preview** zie je ongeveer hoe het wordt.

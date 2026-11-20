@@ -39,7 +39,7 @@ Een pagina die bij een project hoort, zet je onder dat project. Twijfel je, zet 
 
 ## De pagina's in GitHub
 
-Elke pagina staat ook als Markdown in de besloten repo `digitaalgemeengoed/kennisbank`, met wie hem schreef. Dat werkt in beide richtingen: een wijziging in de repo staat binnen vijf minuten in de wiki. Handig voor ontwikkelaars, en een extra kopie.
+Elke pagina staat ook als Markdown in de besloten repo `Digitaal-Gemeengoed/kennisbank`, met wie hem schreef. Dat werkt in beide richtingen: een wijziging in de repo staat binnen vijf minuten in de wiki. Handig voor ontwikkelaars, en een extra kopie.
 
 ## Architectuurmodellen
 

@@ -11,5 +11,5 @@
 # (een fine-grained token met alleen leesrechten op die repo's).
 #
 # Voorbeeld (haal het hekje weg als de repo bestaat):
-# xena                https://github.com/digitaalgemeengoed/architectuur-xena               XENA – Open DMS/RMA
-# office-assistent    https://github.com/digitaalgemeengoed/architectuur-office-assistent   Office Assistent
+# xena                https://github.com/Digitaal-Gemeengoed/architectuur-xena               XENA – Open DMS/RMA
+# office-assistent    https://github.com/Digitaal-Gemeengoed/architectuur-office-assistent   Office Assistent

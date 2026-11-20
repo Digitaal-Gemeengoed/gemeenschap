@@ -40,4 +40,4 @@ De stichting verzorgt strategie, werving, kennisdeling, het starten van projecte
 
 ## Open, en van iedereen
 
-Alle software die het netwerk samen maakt, is open source onder de [EUPL 1.2](https://interoperable-europe.ec.europa.eu/collection/eupl). Elke gemeente mag haar gebruiken, aanpassen en verder geven, ook als het netwerk ooit ophoudt. De code staat op [GitHub](https://github.com/digitaalgemeengoed).
+Alle software die het netwerk samen maakt, is open source onder de [EUPL 1.2](https://interoperable-europe.ec.europa.eu/collection/eupl). Elke gemeente mag haar gebruiken, aanpassen en verder geven, ook als het netwerk ooit ophoudt. De code staat op [GitHub](https://github.com/Digitaal-Gemeengoed).

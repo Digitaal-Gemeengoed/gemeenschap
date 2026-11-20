@@ -28,7 +28,7 @@ Toestemming vragen of een logobestand nodig? Mail [info@digitaalgemeengoed.nl](m
 
 De software die we samen maken, en de broncode van deze site, zijn open source onder de **European Union Public Licence (EUPL) 1.2**. Iedereen mag ze gebruiken, bestuderen, aanpassen en verder verspreiden, onder de voorwaarden van die licentie. De EUPL geeft geen recht op onze naam en ons logo (artikel 5): wie de software hergebruikt of aanpast, doet dat onder een eigen naam.
 
-De broncode van deze site staat op [GitHub](https://github.com/digitaalgemeengoed/gemeenschap).
+De broncode van deze site staat op [GitHub](https://github.com/Digitaal-Gemeengoed/gemeenschap).
 
 ## Teksten en beeld
 

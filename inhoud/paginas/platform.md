@@ -41,7 +41,7 @@ Architectuurmodellen (ArchiMate, in Archi) per project, onder versiebeheer in Gi
 ### Open source catalogus
 Een actueel overzicht van de beschikbare open source componenten, met een link naar hun broncode.
 
-*In voorbereiding. Tot die tijd: [onze repositories op GitHub](https://github.com/digitaalgemeengoed).*
+*In voorbereiding. Tot die tijd: [onze repositories op GitHub](https://github.com/Digitaal-Gemeengoed).*
 
 ### Dashboards voor beheer
 Inzicht in de status van hosting, onderhoud, ondersteuning en prestaties van de gedeelde oplossingen.

@@ -1,7 +1,7 @@
 # Gemeenschapsplatform Digitaal GemeenGoed
 
 Het platform van Digitaal GemeenGoed en NL-Dit voor het netwerk rond de
-[Office Assistent](https://github.com/digitaalgemeengoed): lid worden,
+[Office Assistent](https://github.com/Digitaal-Gemeengoed): lid worden,
 profielen, fora, nieuwsbrief, meldingen en projecten. Deze repo is de bron
 voor de hele server: de software, de instellingen en de pagina's van de site.
 Wat hier op `main` en in versie-tags staat, staat binnen vijf minuten live.
@@ -127,12 +127,12 @@ repo `kennisbank`). Een nieuw bestand hier komt er bij de volgende versie bij.
 
 **Pagina's ook in GitHub.** Eenmalig:
 
-1. Maak de repo `digitaalgemeengoed/kennisbank`, **privé** (de kennisbank is
+1. Maak de repo `Digitaal-Gemeengoed/kennisbank`, **privé** (de kennisbank is
    alleen voor leden), met een eerste commit op `main` (bijvoorbeeld een README).
 2. Zet de publieke sleutel van de server als **deploy key met schrijfrechten**
    bij die repo (Settings → Deploy keys). `bijwerken.sh` toont hem zolang de
    koppeling er niet is; anders: `sudo cat /opt/gemeenschap/geheimen/kennisbank.pub`.
-3. Zet in `.env`: `KENNISBANK_REPO=git@github.com:digitaalgemeengoed/kennisbank.git`
+3. Zet in `.env`: `KENNISBANK_REPO=git@github.com:Digitaal-Gemeengoed/kennisbank.git`
    en draai `sudo /opt/gemeenschap/server/bijwerken.sh`.
 
 Daarna staat elke pagina als Markdown in de repo (met wie hem schreef), en
@@ -143,7 +143,7 @@ komt een wijziging in de repo binnen vijf minuten in de wiki.
 `architectuur.<domein>` toont het HTML-rapport van Archi voor elk model, alleen
 voor leden. Eén repo per project of domein, in het formaat van coArchi.
 
-1. Maak de repo (bijvoorbeeld `digitaalgemeengoed/architectuur-xena`) en zet
+1. Maak de repo (bijvoorbeeld `Digitaal-Gemeengoed/architectuur-xena`) en zet
    het model erin met coArchi in Archi.
 2. Voeg een regel toe aan `architectuur/repos.txt` (zie de uitleg daar) en
    voeg samen op `main`. Een nieuwe versie is niet nodig.
@@ -389,7 +389,7 @@ account in Keycloak.
 ## Installeren
 
 Op een nieuwe VPS, met de basis uit
-[oa-uitrol](https://github.com/digitaalgemeengoed/oa-uitrol) (INRICHTING.md,
+[oa-uitrol](https://github.com/Digitaal-Gemeengoed/oa-uitrol) (INRICHTING.md,
 stap 12): `inrichten.sh` (kies 4), `ssh-afsluiten.sh`, `installeer.sh`.
 
 ## Beheer op de server

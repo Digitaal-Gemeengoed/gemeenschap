@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Digitaal GemeenGoed — pagina's uit GitHub
- * Description: De pagina's in inhoud/paginas/ van de repo digitaalgemeengoed/gemeenschap worden WordPress-pagina's. Die pagina's wijzig je via GitHub; in WordPress staan ze op slot.
+ * Description: De pagina's in inhoud/paginas/ van de repo Digitaal-Gemeengoed/gemeenschap worden WordPress-pagina's. Die pagina's wijzig je via GitHub; in WordPress staan ze op slot.
  *
  * Een pagina is een Markdown-bestand met bovenaan een kopje tussen twee
  * regels "---" (zie inhoud/README.md):
@@ -39,7 +39,7 @@ function dg_inhoud_bron( $post ): string {
 
 /** De link naar het bestand op GitHub. */
 function dg_inhoud_github( string $bron ): string {
-	$basis = rtrim( (string) ( getenv( 'DG_INHOUD_REPO' ) ?: 'https://github.com/digitaalgemeengoed/gemeenschap/blob/main/inhoud' ), '/' );
+	$basis = rtrim( (string) ( getenv( 'DG_INHOUD_REPO' ) ?: 'https://github.com/Digitaal-Gemeengoed/gemeenschap/blob/main/inhoud' ), '/' );
 	return $basis . '/' . implode( '/', array_map( 'rawurlencode', explode( '/', $bron ) ) );
 }
 

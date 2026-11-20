@@ -11,7 +11,7 @@ volgorde: 1
 ::: kaarten
 ### Code en repositories
 icoon: code
-link: https://github.com/digitaalgemeengoed
+link: https://github.com/Digitaal-Gemeengoed
 Alle code staat op GitHub, met versiebeheer, meldingen en een open geschiedenis.
 
 ### Architectuur

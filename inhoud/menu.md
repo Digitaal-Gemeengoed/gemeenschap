@@ -70,5 +70,5 @@ punten met een link komen in de onderste regel.
 - [Voorwaarden](voorwaarden.md)
 - [Privacyverklaring](privacy.md)
 - [Colofon](colofon.md)
-- [Code op GitHub](https://github.com/digitaalgemeengoed)
-- [Deze site op GitHub](https://github.com/digitaalgemeengoed/gemeenschap)
+- [Code op GitHub](https://github.com/Digitaal-Gemeengoed)
+- [Deze site op GitHub](https://github.com/Digitaal-Gemeengoed/gemeenschap)

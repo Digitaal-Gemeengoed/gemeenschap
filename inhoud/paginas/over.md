@@ -55,4 +55,4 @@ Al dat werk komt samen op het [platform](platform.md): fora, kennis, architectuu
 
 ## Open, en van iedereen
 
-Alle software die we samen maken is open source, onder de [EUPL](https://interoperable-europe.ec.europa.eu/collection/eupl). Elke gemeente mag haar gebruiken, aanpassen en verder geven, ook als het netwerk ooit ophoudt. De code staat op [GitHub](https://github.com/digitaalgemeengoed).
+Alle software die we samen maken is open source, onder de [EUPL](https://interoperable-europe.ec.europa.eu/collection/eupl). Elke gemeente mag haar gebruiken, aanpassen en verder geven, ook als het netwerk ooit ophoudt. De code staat op [GitHub](https://github.com/Digitaal-Gemeengoed).
