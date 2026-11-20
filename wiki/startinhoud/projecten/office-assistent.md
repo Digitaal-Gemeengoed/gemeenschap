@@ -9,7 +9,7 @@ labels: projecten, office-assistent, mira, prototype
 De Office Assistent helpt een medewerker een stuk goed vast te leggen **op het moment dat het ontstaat**: in de tekstverwerker, het rekenblad of de presentatie, niet achteraf in een archiefsysteem. Het concept heet **MIRA** (*Modular Information & Records Assistant*) en komt uit *XENA Deel II*; in de werkomgeving heet het gewoon *Assistent*.
 
 - **Het concept laten zien:** de demo [MIRA](/demos/mira).
-- **Het werkende prototype:** de repo's op [GitHub](https://github.com/Digitaal-Gemeengoed), met uitleg op [digitaalgemeengoed.github.io](https://digitaalgemeengoed.github.io/).
+- **Het werkende prototype:** de repo's op [GitHub](https://github.com/Digitaal-Gemeengoed), met uitleg op [digitaal-gemeengoed.github.io](https://digitaal-gemeengoed.github.io/).
 - **Volgen en melden:** [Redmine](https://projecten.digitaalgemeengoed.nl/projects/office-assistent), en het forum *Office Assistent*.
 
 > **Een prototype, geen product.** Uitproberen mag, maar alleen met testgegevens: geen echte persoonsgegevens of vertrouwelijke stukken.

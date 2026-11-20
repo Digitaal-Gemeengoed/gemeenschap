@@ -2,6 +2,12 @@
 
 ## Nog niet uitgebracht
 
+## 0.21.1 — 2026-11-20
+
+- **Nieuwe plek op GitHub.** De repo's staan nu in de organisatie [Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed). De standaardadressen in `compose.yml` (`DG_INHOUD_REPO`) en `server/lib.sh` (`DG_REPO`), de links op de pagina's en in de startinhoud van de wiki wijzen daarheen, en de startpagina heet nu [digitaal-gemeengoed.github.io](https://digitaal-gemeengoed.github.io/).
+- Staat in `.env` nog een eigen `DG_REPO`, `DG_INHOUD_REPO` of `KENNISBANK_REPO` met `digitaalgemeengoed`? Zet die om naar `Digitaal-Gemeengoed`. Het oude adres werkt via de doorverwijzing van GitHub nog.
+- De tag van 0.21.0 heette per abuis `v0.20.1`; deze versie is weer gelijk getagd.
+
 ## 0.21.0 — 2026-11-13
 
 - **Beheer op het dashboard.** *Beheer*, *Ledenadministratie* en *Toezeggingen* staan nu ook in het menu op het dashboard (de startpagina na inloggen), alleen voor wie ze mag gebruiken.
