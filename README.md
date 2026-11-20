@@ -6,6 +6,12 @@ profielen, fora, nieuwsbrief, meldingen en projecten. Deze repo is de bron
 voor de hele server: de software, de instellingen en de pagina's van de site.
 Wat hier op `main` en in versie-tags staat, staat binnen vijf minuten live.
 
+De ontwerpen met de besluiten staan in [docs/ontwerp/](docs/ontwerp/): het
+[gemeenschapsplatform](docs/ontwerp/gemeenschapsplatform.md), de
+[documentendienst](docs/ontwerp/documentendienst.md) en de
+[beheerdienst](docs/ontwerp/beheerdienst.md). De documentatie van de Office
+Assistent zelf staat in [oa-uitrol/docs](https://github.com/Digitaal-Gemeengoed/oa-uitrol/blob/main/docs/README.md).
+
 | Adres | Dienst | Waarvoor |
 |---|---|---|
 | `digitaalgemeengoed.nl` | WordPress met BuddyPress, bbPress en CiviCRM | site, leden en groepen, fora onder `/forum/`, nieuwsbrief en contacten |
