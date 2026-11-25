@@ -2,3 +2,5 @@
 # Sleutels (bijvoorbeeld de deploy key van de kennisbank-repo)
 geheimen/
 __pycache__/
+/beheer/beheer
+/documenten/documenten
