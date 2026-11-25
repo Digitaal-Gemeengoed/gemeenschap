@@ -18,6 +18,8 @@ RUN set -eux; \
     rm config/database.yml; \
     apt-get purge -y --auto-remove build-essential git; rm -rf /var/lib/apt/lists/*; \
     chown -R redmine:redmine plugins
+# Het logo in de kop met een link naar de hoofdpagina.
+COPY --chown=redmine:redmine dg_kop plugins/dg_kop
 # Mail via de SMTP-dienst uit .env (configuration.yml wordt met ERB gelezen).
 COPY --chown=redmine:redmine configuration.yml config/configuration.yml
 COPY --chown=redmine:redmine inrichten.rb /usr/local/share/dg/inrichten.rb

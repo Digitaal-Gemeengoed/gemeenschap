@@ -2,7 +2,7 @@
   "realm": "gemeenschap",
   "enabled": true,
   "displayName": "Digitaal GemeenGoed",
-  "displayNameHtml": "<span>Digitaal GemeenGoed</span>",
+  "displayNameHtml": "<a href=\"$(env:DG_BASIS_URL)/\" title=\"Naar de hoofdpagina\"><span>Digitaal GemeenGoed</span></a>",
   "sslRequired": "external",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,

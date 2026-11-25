@@ -14,6 +14,11 @@
 .pf-v5-c-login__main-header { border-top-color: var(--dg-blauw) !important; }
 .pf-v5-c-button.pf-m-primary { --pf-v5-c-button--m-primary--BackgroundColor: var(--dg-blauw); --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--dg-blauw-donker); }
 /* De uil boven de naam; het standaardthema maakt de naam wit (voor een donkere achtergrond). */
+/* Het logo staat in de link naar de hoofdpagina (displayNameHtml in de realm). */
+#kc-header-wrapper a { display: block; text-decoration: none; }
+#kc-header-wrapper a:hover span { text-decoration: underline; }
+#kc-header-wrapper:has(a)::before { content: none; }
+#kc-header-wrapper a::before,
 #kc-header-wrapper::before {
   content: "";
   display: block;

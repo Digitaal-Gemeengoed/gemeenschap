@@ -713,6 +713,40 @@ add_shortcode(
 );
 
 // ---------------------------------------------------------------------------
+// Modules in een nieuw tabblad. De hoofdsite is het hoofdmenu en blijft open;
+// een link naar een module op een subdomein (kennis., documenten., chat.,
+// projecten., beheer. …) opent in een eigen tabblad. Niet voor aanmelden.
+// (inloggen en uitloggen horen in hetzelfde tabblad), behalve het eigen account.
+// In de plugin en niet in het thema, zodat het met elk thema werkt. Bij een
+// klik, zodat het ook geldt voor links die later op de pagina komen.
+// ---------------------------------------------------------------------------
+
+add_action(
+	'wp_footer',
+	static function () {
+		$basis = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		?>
+<script>
+(function (basis) {
+	function module(a) {
+		if (!a.href || a.target || !/^https:$/.test(a.protocol)) return false;
+		var h = a.hostname;
+		if (h === location.hostname || h.slice(-basis.length - 1) !== '.' + basis) return false;
+		if (h === 'aanmelden.' + basis) return a.pathname.indexOf('/account') !== -1;
+		return true;
+	}
+	document.addEventListener('click', function (e) {
+		var a = e.target.closest && e.target.closest('a[href]');
+		if (a && module(a)) { a.target = '_blank'; a.rel = (a.rel ? a.rel + ' ' : '') + 'noopener'; }
+	}, true);
+})(<?php echo wp_json_encode( $basis ); ?>);
+</script>
+		<?php
+	},
+	99
+);
+
+// ---------------------------------------------------------------------------
 // Mail via de SMTP-dienst (dezelfde als Keycloak, CiviCRM en Redmine)
 // ---------------------------------------------------------------------------
 

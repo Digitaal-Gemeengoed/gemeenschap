@@ -2,6 +2,12 @@
 
 ## Nog niet uitgebracht
 
+## 0.22.1 — 2026-11-25
+
+- **Terug naar de hoofdpagina.** Het logo (en de naam) linksboven linkt nu op elk subdomein naar de hoofdpagina: aanmelden (Keycloak), projecten (Redmine, met de nieuwe plugin `dg_kop`), kennis (Wiki.js), documenten, beheer en de overzichtspagina van architectuur. In Documenten en Beheer gaat de naam van de module zelf nog naar de start van die module. De chat (Element) heeft geen logo in de app; daar helpt het nieuwe tabblad.
+- **Modules in een nieuw tabblad.** Een link op de hoofdsite naar een module op een subdomein opent in een eigen tabblad, zodat de hoofdsite (het hoofdmenu) open blijft. Inloggen en uitloggen blijven in hetzelfde tabblad. Dit staat in de plugin en niet in het thema, zodat het met elk thema werkt.
+- **Ontwerp** voor meer organisaties op hetzelfde platform (proefstuk): `docs/ontwerp/meerdere-organisaties.md`.
+
 ## 0.22.0 — 2026-11-25
 
 - **Openbaar: geen wachtwoord meer voor de site.** De afscherming met één gebruikersnaam en wachtwoord (HTTP Basic Auth in Caddy) is weg, net als `server/afschermen.sh` en het cookie `dg_toegang`. De oude regels `DG_TOEGANG…` gaan bij het bijwerken vanzelf uit `.env`. Wat alleen voor leden is (kennisbank, documenten, architectuur, besloten berichten), blijft dat via het inloggen met Keycloak.

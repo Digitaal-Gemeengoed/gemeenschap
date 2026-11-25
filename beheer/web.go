@@ -123,6 +123,8 @@ func grootte(n int64) string {
 
 func (a *App) laadSjablonen() {
 	functies := template.FuncMap{
+		// De hoofdpagina (het logo en de naam linken daarheen).
+		"site":      func() string { return strings.TrimRight(a.Links.Site, "/") },
 		"datum":     datum,
 		"dag":       dag,
 		"grootte":   grootte,

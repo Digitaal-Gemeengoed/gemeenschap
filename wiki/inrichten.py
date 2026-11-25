@@ -159,9 +159,20 @@ body .v-application .blue--text { color: #14478f !important; }
 body .v-application .contents a { color: #1a56a8; }
 body .nav-header-title .title { font-weight: 800 !important; letter-spacing: -.01em; }
 """
-resultaat(gq("""mutation($css: String!) { theming { setConfig(theme: "default", iconset: "mdi", darkMode: false,
-               tocPosition: "left", injectCSS: $css, injectHead: "", injectBody: "") { responseResult { succeeded message } } } }""",
-             JWT, {"css": CSS})["theming"]["setConfig"], "uiterlijk")
+CSS += "body .nav-header .v-avatar { cursor: pointer; }\n"
+# Het logo linksboven gaat naar de hoofdpagina van de site (Wiki.js zelf stuurt
+# het naar de start van de kennisbank; die blijft bereikbaar via de naam).
+BODY = """<script>
+document.addEventListener('click', function (e) {
+  var logo = e.target.closest && e.target.closest('.nav-header .v-avatar');
+  if (!logo) return;
+  e.preventDefault(); e.stopPropagation();
+  window.location.href = 'https://%s/';
+}, true);
+</script>""" % DOMEIN
+resultaat(gq("""mutation($css: String!, $body: String!) { theming { setConfig(theme: "default", iconset: "mdi", darkMode: false,
+               tocPosition: "left", injectCSS: $css, injectHead: "", injectBody: $body) { responseResult { succeeded message } } } }""",
+             JWT, {"css": CSS, "body": BODY})["theming"]["setConfig"], "uiterlijk")
 
 # --- Groepen ---------------------------------------------------------------
 LEZEN = ["read:pages", "read:assets", "read:comments", "read:source", "read:history"]

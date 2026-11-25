@@ -22,6 +22,7 @@ BRON="$DG_STAAT/architectuur"
 SITE=/srv/dg-architectuur
 IMAGE="woozymasta/archimate-ci-image:$(sed -n 's/^ARCHI_CI_VERSIE=//p' .env | grep . || echo 5.7.0-1.0.6)"
 TOKEN="$(sed -n 's/^ARCH_GITHUB_TOKEN=//p' .env)"
+DOMEIN="$(sed -n 's/^DOMEIN=//p' .env)"
 OPNIEUW=0; if [ "${1:-}" = --opnieuw ]; then OPNIEUW=1; fi
 
 install -d -m 700 "$DG_STAAT" "$BRON"
@@ -131,6 +132,8 @@ done
   header div, main { max-width: 64rem; margin: 0 auto; }
   header h1 { margin: 0; font-size: 1.5rem; font-weight: 800; }
   header p { margin: .3rem 0 0; opacity: .85; }
+  header .merk { display: inline-flex; align-items: center; gap: .5rem; color: #fff; text-decoration: none; font-weight: 700; margin-bottom: .6rem; }
+  header .merk:hover { text-decoration: underline; }
   main { padding: 2rem 1rem 3rem; }
   .modellen { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1.25rem; padding: 0; list-style: none; }
   .modellen li { background: #fff; border: 1px solid var(--rand); border-radius: 14px; padding: 1.2rem 1.3rem; }
@@ -145,9 +148,8 @@ done
 </style>
 </head>
 <body>
-<header><div><h1>Architectuurmodellen</h1><p>De ArchiMate-modellen van de projecten van Digitaal GemeenGoed, alleen voor leden.</p></div></header>
-<main>
 KOP
+  printf '<header><div><a class="merk" href="https://%s/" title="Naar de hoofdpagina"><img src="https://%s/wp-content/themes/digitaalgemeengoed/assets/icoon.png" alt="" width="36" height="36">Digitaal GemeenGoed</a><h1>Architectuurmodellen</h1><p>De ArchiMate-modellen van de projecten van Digitaal GemeenGoed, alleen voor leden.</p></div></header>\n<main>\n' "$DOMEIN" "$DOMEIN"
   if [ -s "$BRON/lijst" ]; then
     echo '<ul class="modellen">'
     while IFS='|' read -r naam titel url datum; do

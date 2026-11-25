@@ -10,7 +10,7 @@
 </head>
 <body>
 <header class="kop">
-  <a class="merk" href="/"><img src="/statisch/icoon.png" alt="" width="36" height="36"><span><b>Digitaal GemeenGoed</b><small>Documenten</small></span></a>
+  <span class="merk"><a href="{{site}}/" title="Naar de hoofdpagina"><img src="/statisch/icoon.png" alt="Digitaal GemeenGoed" width="36" height="36"></a><span><a href="{{site}}/" title="Naar de hoofdpagina"><b>Digitaal GemeenGoed</b></a><a href="/"><small>Documenten</small></a></span></span>
   {{with .Sessie}}
   <form class="wie" method="post" action="/uitloggen">
     <span title="{{.Email}}">{{.Naam}}</span>

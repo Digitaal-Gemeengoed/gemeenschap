@@ -14,6 +14,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -196,6 +197,8 @@ func soortNaam(mt, naam string) string {
 
 func (a *App) laadSjablonen() {
 	functies := template.FuncMap{
+		// De hoofdpagina (het logo en de naam linken daarheen).
+		"site":    func() string { return strings.TrimRight("https://"+os.Getenv("WORDPRESS_HOST"), "/") },
 		"grootte": grootte,
 		"datum":   datum,
 		"soortIcoon": func(mt, naam string) string {
