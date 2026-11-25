@@ -30,17 +30,22 @@ while [ -z "${DOMEIN:-}" ]; do
   DOMEIN="${DOMEIN,,}"; DOMEIN="${DOMEIN#https://}"; DOMEIN="${DOMEIN%/}"
   geldig_domein "$DOMEIN" || { waarschuw "Dat is geen geldig domein."; DOMEIN=""; }
 done
+# Welke modules aan staan (organisatie.yml), en dus welke namen nodig zijn.
+organisatie_lezen || stop "organisatie.yml klopt niet (zie hierboven). Pas hem aan op GitHub en probeer opnieuw."
+ok "$(org_waarde ORG_NAAM), modules: $(modules)"
 IP="$(publiek_ip)"
 ONTBREEKT=0
-for naam in "$DOMEIN" "www.$DOMEIN" "aanmelden.$DOMEIN" "projecten.$DOMEIN" "forum.$DOMEIN" "kennis.$DOMEIN" "architectuur.$DOMEIN" "documenten.$DOMEIN" "beheer.$DOMEIN"; do
+for naam in $(dns_namen "$DOMEIN"); do
   gevonden="$(getent ahostsv4 "$naam" | awk 'NR==1{print $1}')"
   if [ "$gevonden" = "$IP" ]; then ok "$naam wijst naar deze server"; else waarschuw "$naam wijst naar '${gevonden:-niets}', niet naar $IP"; ONTBREEKT=1; fi
 done
-for naam in "$DOMEIN" "aanmelden.$DOMEIN" "projecten.$DOMEIN"; do
+NODIG=("$DOMEIN" "aanmelden.$DOMEIN")
+if module_aan projecten; then NODIG+=("projecten.$DOMEIN"); fi
+for naam in "${NODIG[@]}"; do
   gevonden="$(getent ahostsv4 "$naam" | awk 'NR==1{print $1}')"
-  [ "$gevonden" = "$IP" ] || stop "Maak eerst in je DNS A-records naar $IP voor $DOMEIN, aanmelden.$DOMEIN en projecten.$DOMEIN (en liefst www. en forum.), wacht een kwartier en probeer opnieuw. Zonder die records kan Caddy geen certificaten halen."
+  [ "$gevonden" = "$IP" ] || stop "Maak eerst in je DNS A-records naar $IP voor ${NODIG[*]} (en liefst ook de andere namen hierboven), wacht een kwartier en probeer opnieuw. Zonder die records kan Caddy geen certificaten halen."
 done
-[ "$ONTBREEKT" = 0 ] || waarschuw "www. en forum. zijn alleen doorverwijzingen, kennis., architectuur., documenten. en beheer. kunnen later; Caddy haalt het certificaat zodra de naam naar deze server wijst."
+[ "$ONTBREEKT" = 0 ] || waarschuw "De andere namen kunnen later; Caddy haalt het certificaat zodra de naam naar deze server wijst."
 
 # --- .env -----------------------------------------------------------------------
 if [ -s .env ]; then

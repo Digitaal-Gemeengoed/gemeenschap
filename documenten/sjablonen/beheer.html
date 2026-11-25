@@ -10,7 +10,7 @@
 {{range $d.Lijst}}
 <tr{{if eq .Status "weg"}} class="weg"{{end}}>
   <td>{{if eq .Soort "persoonlijk"}}<span class="naam schijf">{{if .EigenaarNaam}}{{.EigenaarNaam}}{{else}}{{.Eigenaar.String}}{{end}}</span>{{else}}<a class="naam schijf" href="/r/{{.Sleutel}}">{{.Naam}}</a>{{end}}</td>
-  <td>{{if eq .Soort "cooperatie"}}<span class="chip groen">Coöperatie</span>{{else if eq .Soort "werkgroep"}}<span class="chip paars">Werkgroep</span>{{else if eq .Soort "project"}}<span class="chip">Project</span>{{else}}<span class="chip grijs">Persoonlijk</span>{{end}}</td>
+  <td>{{if eq .Soort "cooperatie"}}<span class="chip groen">{{Soort}}</span>{{else if eq .Soort "werkgroep"}}<span class="chip paars">Werkgroep</span>{{else if eq .Soort "project"}}<span class="chip">Project</span>{{else}}<span class="chip grijs">Persoonlijk</span>{{end}}</td>
   <td>{{if eq .Status "actief"}}actief{{else if eq .Status "weg"}}<span class="zacht">weg</span>{{else if .BevrorenSinds.Valid}}<span class="chip rood">bevroren sinds {{datum .BevrorenSinds.Time}}</span>{{else}}alleen lezen{{end}}</td>
   <td class="r">{{.Aantal}}</td>
   <td class="r">{{grootte .Gebruik}}{{if .Quotum.Valid}}<small>{{procent .Gebruik .Quotum.Int64}}% van het quotum</small>{{end}}</td>

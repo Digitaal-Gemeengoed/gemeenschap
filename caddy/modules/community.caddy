@@ -1,0 +1,6 @@
+# Module community (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+forum.{$DOMEIN} {
+	redir https://{$DOMEIN}/forum{uri} permanent
+}

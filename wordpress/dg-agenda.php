@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — agenda
+ * Plugin Name: Gemeenschapsplatform — agenda
  * Description: De agenda op /agenda/: evenementen van de coöperatie, werkgroepen en projecten, en tips van leden voor evenementen elders. De formulieren staan op de site; de gegevens staan in CiviCRM (evenementen en deelnemers). Aanmelden met één klik, een wachtlijst, een iCal-abonnement per filter.
  *
  * Wie mag wat:
@@ -27,6 +27,11 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Alleen als de module agenda aan staat (organisatie.yml, dg-platform.php).
+if ( function_exists( 'dg_module' ) && ! dg_module( 'agenda' ) ) {
+	return;
+}
 
 const DG_AG_VERSIE = 3;          // ophogen als de adressen veranderen
 const DG_AG_CIVI   = 1;          // ophogen als de velden in CiviCRM veranderen
@@ -84,7 +89,7 @@ function dg_ag_inrichten(): void {
 			array(
 				'values' => array(
 					'name'        => DG_AG_GROEP,
-					'title'       => 'Digitaal GemeenGoed',
+					'title'       => dg_org( 'naam' ),
 					'extends'     => 'Event',
 					'style'       => 'Inline',
 					'is_active'   => true,
@@ -301,7 +306,7 @@ function dg_ag_gast_contact( string $email, string $naam, string $org ): int {
 				'contact_type' => 'Individual',
 				'first_name'   => $delen[0] ?? '',
 				'last_name'    => $delen[1] ?? '',
-				'source'       => 'Agenda Digitaal GemeenGoed',
+				'source'       => 'Agenda ' . dg_org( 'naam' ),
 			),
 		)
 	);
@@ -418,7 +423,7 @@ function dg_ag_mag_zien( array $e ): bool {
 /** De vaste tags (coöperatie, werkgroepen, projecten), uit het nieuws (dg-berichten.php). */
 function dg_ag_vaste_tags(): array {
 	if ( ! defined( 'DG_BER_TAG' ) ) {
-		return array( 'cooperatie' => 'Coöperatie' );
+		return array( 'cooperatie' => dg_soort( true ) );
 	}
 	$uit = array();
 	foreach ( (array) get_terms( array( 'taxonomy' => DG_BER_TAG, 'hide_empty' => false, 'meta_key' => 'dg_soort', 'number' => 300 ) ) as $t ) { // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -435,7 +440,7 @@ function dg_ag_tagnaam( string $tag ): string {
 }
 
 function dg_ag_tagsoort( string $tag ): string {
-	return 'cooperatie' === $tag ? 'Coöperatie' : ( str_starts_with( $tag, 'werkgroep-' ) ? 'Werkgroep' : ( str_starts_with( $tag, 'project-' ) ? 'Project' : '' ) );
+	return 'cooperatie' === $tag ? dg_soort( true ) : ( str_starts_with( $tag, 'werkgroep-' ) ? 'Werkgroep' : ( str_starts_with( $tag, 'project-' ) ? 'Project' : '' ) );
 }
 
 // ---------------------------------------------------------------------------
@@ -557,7 +562,7 @@ add_action(
 			$fouten[] = 'Geef bij een evenement elders de link naar de organisator.';
 		}
 		if ( 'eigen' === $soort && ( '' === $tag || ! dg_ag_mag_namens( $tag ) ) && ! ( $oud && $oud['tag'] === $tag && dg_ag_mag_bewerken( $oud ) ) ) {
-			$fouten[] = 'Kies namens wie je het organiseert: de coöperatie, een werkgroep of een project dat jij beheert. Iets elders? Kies dan "Een evenement elders".';
+			$fouten[] = 'Kies namens wie je het organiseert: de ' . dg_soort() . ', een werkgroep of een project dat jij beheert. Iets elders? Kies dan "Een evenement elders".';
 		}
 		if ( 'extern' === $soort && '' !== $tag && ! isset( dg_ag_vaste_tags()[ $tag ] ) ) {
 			$tag = '';
@@ -777,7 +782,7 @@ function dg_ag_aanmelding( array $e, int $contact ): string {
 				'status_id:name' => $status,
 				'role_id:name'   => array( 'Attendee' ),
 				'register_date'  => dg_ag_nu(),
-				'source'         => 'Agenda Digitaal GemeenGoed',
+				'source'         => 'Agenda ' . dg_org( 'naam' ),
 			),
 		)
 	);
@@ -874,7 +879,7 @@ function dg_ag_gast(): void {
 	wp_mail(
 		$email,
 		'Bevestig je aanmelding: ' . $e['titel'],
-		"Hallo $naam,\n\nJe wilt je aanmelden voor \"{$e['titel']}\" (" . dg_ag_wanneer( $e ) . ").\n\nBevestig met deze link (24 uur geldig):\n\n" . home_url( '/agenda/bevestig/' . $sleutel . '/' ) . "\n\nWas jij dit niet? Dan hoef je niets te doen; we bewaren je gegevens niet.\n\nDigitaal GemeenGoed\n"
+		"Hallo $naam,\n\nJe wilt je aanmelden voor \"{$e['titel']}\" (" . dg_ag_wanneer( $e ) . ").\n\nBevestig met deze link (24 uur geldig):\n\n" . home_url( '/agenda/bevestig/' . $sleutel . '/' ) . "\n\nWas jij dit niet? Dan hoef je niets te doen; we bewaren je gegevens niet.\n\n" . dg_org( 'naam' ) . "\n"
 	);
 	$naar( 'Bijna klaar: we stuurden je een mail. Klik op de link daarin om je aanmelding te bevestigen.', false );
 }
@@ -966,7 +971,7 @@ function dg_ag_vevent( array $e, bool $met_link ): string {
 }
 
 function dg_ag_vcalendar( string $naam, string $events ): string {
-	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Digitaal GemeenGoed//Agenda//NL\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n" . dg_ag_ics_regel( 'X-WR-CALNAME:' . dg_ag_ics_tekst( $naam ) ) . $events . "END:VCALENDAR\r\n";
+	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//" . str_replace( array( "\r", "\n", "/" ), '', dg_org( 'naam' ) ) . "//Agenda//NL\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n" . dg_ag_ics_regel( 'X-WR-CALNAME:' . dg_ag_ics_tekst( $naam ) ) . $events . "END:VCALENDAR\r\n";
 }
 
 /** Een mail aan een contact in CiviCRM (op het eerste e-mailadres). */
@@ -986,7 +991,7 @@ function dg_ag_mail( string $aan, string $onderwerp, string $tekst, ?array $e = 
 		file_put_contents( $pad, dg_ag_vcalendar( $e['titel'], dg_ag_vevent( $e, $met_link ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$bijlage[] = $pad;
 	}
-	$ok = (bool) wp_mail( $aan, $onderwerp, $tekst . "\nDigitaal GemeenGoed\n" . home_url( '/' ) . "\n", array( 'Content-Type: text/plain; charset=UTF-8' ), $bijlage );
+	$ok = (bool) wp_mail( $aan, $onderwerp, $tekst . "\n" . dg_org( 'naam' ) . "\n" . home_url( '/' ) . "\n", array( 'Content-Type: text/plain; charset=UTF-8' ), $bijlage );
 	foreach ( $bijlage as $b ) {
 		wp_delete_file( $b );
 	}
@@ -1053,7 +1058,7 @@ add_action(
 		}
 		$meta = array(
 			'og:type'        => 'website',
-			'og:site_name'   => 'Digitaal GemeenGoed',
+			'og:site_name'   => dg_org( 'naam' ),
 			'og:title'       => $e['titel'],
 			'og:description' => dg_ag_wanneer( $e ) . ( dg_ag_waar( $e ) ? ' · ' . dg_ag_waar( $e ) : '' ) . ( $e['samenvatting'] ? ' — ' . $e['samenvatting'] : '' ),
 			'og:url'         => dg_ag_url( $e ),
@@ -1163,7 +1168,7 @@ function dg_ag_lijst(): string {
 	$f    = dg_ag_filter();
 	$tags = dg_ag_vaste_tags();
 	$h    = '<header class="dg-ber-feedkop dg-ag-kop"><div><h1>' . ( $f['tag'] ? 'Agenda: ' . esc_html( dg_ag_tagnaam( $f['tag'] ) ) : 'Agenda' ) . '</h1>'
-		. '<p>' . ( $f['eerder'] ? 'Eerdere evenementen.' : 'Bijeenkomsten van de coöperatie, werkgroepen en projecten, en tips van leden voor evenementen elders.' ) . '</p></div>'
+		. '<p>' . ( $f['eerder'] ? 'Eerdere evenementen.' : 'Bijeenkomsten van de ' . dg_soort() . ', werkgroepen en projecten, en tips van leden voor evenementen elders.' ) . '</p></div>'
 		. ( is_user_logged_in() ? '<a class="dg-db-knop" href="' . esc_url( add_query_arg( 'tag', $f['tag'] ?: false, dg_ag_url( null, 'nieuw' ) ) ) . '">+ Evenement toevoegen</a>' : '' ) . '</header>';
 
 	// Filters.
@@ -1173,7 +1178,7 @@ function dg_ag_lijst(): string {
 	};
 	$h .= '<nav class="dg-ag-filters" aria-label="Filters">'
 		. $chip( 'Alles', array(), ! $f['tag'] && ! $f['soort'] && ! $f['mijn'] && ! $f['eerder'] )
-		. $chip( 'Coöperatie', array( 'tag' => 'cooperatie' ), 'cooperatie' === $f['tag'] )
+		. $chip( dg_soort( true ), array( 'tag' => 'cooperatie' ), 'cooperatie' === $f['tag'] )
 		. $chip( 'Van ons', array( 'soort' => 'eigen' ), 'eigen' === $f['soort'] )
 		. $chip( 'Elders (tips)', array( 'soort' => 'extern' ), 'extern' === $f['soort'] )
 		. ( is_user_logged_in() ? $chip( 'Mijn aanmeldingen', array( 'mijn' => 1 ), $f['mijn'] ) : '' )
@@ -1406,7 +1411,7 @@ function dg_ag_formulier( ?array $e ): string {
 		. ( $e ? '<input type="hidden" name="id" value="' . (int) $e['id'] . '">' : '' );
 
 	$h .= '<fieldset class="dg-ag-soort"><legend>Wat voor evenement?</legend>'
-		. '<label class="dg-ag-keuze"><input type="radio" name="soort" value="eigen"' . checked( $soort, 'eigen', false ) . ( $namens ? '' : ' disabled' ) . '><span><strong>Van ons</strong>Namens de coöperatie, een werkgroep of een project' . ( $namens ? '' : ' <em>(alleen als je een werkgroep of project beheert, of in de kerngroep zit)</em>' ) . '</span></label>'
+		. '<label class="dg-ag-keuze"><input type="radio" name="soort" value="eigen"' . checked( $soort, 'eigen', false ) . ( $namens ? '' : ' disabled' ) . '><span><strong>Van ons</strong>Namens de ' . dg_soort() . ', een werkgroep of een project' . ( $namens ? '' : ' <em>(alleen als je een werkgroep of project beheert, of in de kerngroep zit)</em>' ) . '</span></label>'
 		. '<label class="dg-ag-keuze"><input type="radio" name="soort" value="extern"' . checked( $soort, 'extern', false ) . '><span><strong>Elders (tip)</strong>Een evenement van een andere organisatie dat interessant is voor leden</span></label></fieldset>';
 
 	$met_soort = static function ( array $lijst ): array {
@@ -1529,7 +1534,7 @@ function dg_ag_ical( string $sleutel ): void {
 	}
 	nocache_headers();
 	header( 'Content-Type: text/calendar; charset=utf-8' );
-	echo dg_ag_vcalendar( 'Digitaal GemeenGoed' . ( $f['tag'] ? ' · ' . dg_ag_tagnaam( $f['tag'] ) : '' ), $events ); // phpcs:ignore WordPress.Security.EscapeOutput
+	echo dg_ag_vcalendar( dg_org( 'naam' ) . ( $f['tag'] ? ' · ' . dg_ag_tagnaam( $f['tag'] ) : '' ), $events ); // phpcs:ignore WordPress.Security.EscapeOutput
 }
 
 function dg_ag_csv( int $id ): void {

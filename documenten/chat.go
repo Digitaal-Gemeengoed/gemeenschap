@@ -250,8 +250,8 @@ func (a *App) chatKamers(ctx context.Context) ([]gewensteKamer, error) {
 		coop[e] = true
 	}
 	uit = append(uit,
-		gewensteKamer{Sleutel: "algemeen", Naam: "Algemeen", Onderwerp: "Voor iedereen in het netwerk van Digitaal GemeenGoed: kennismaken, vragen, aankondigingen.", Iedereen: true, Moderators: kern},
-		gewensteKamer{Sleutel: "cooperatie", Naam: "Coöperatie", Onderwerp: "Voor de members en de kerngroep van de coöperatie.", Leden: coop, Moderators: kern},
+		gewensteKamer{Sleutel: "algemeen", Naam: "Algemeen", Onderwerp: "Voor iedereen in het netwerk van " + orgNaam() + ": kennismaken, vragen, aankondigingen.", Iedereen: true, Moderators: kern},
+		gewensteKamer{Sleutel: "cooperatie", Naam: orgSoort(true), Onderwerp: "Voor de members en de kerngroep van de " + orgSoort(false) + ".", Leden: coop, Moderators: kern},
 		gewensteKamer{Sleutel: "kerngroep", Naam: "Kerngroep", Onderwerp: "Overleg van de kerngroep.", Leden: kern, Moderators: map[string]bool{}},
 	)
 

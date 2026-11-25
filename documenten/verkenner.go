@@ -227,7 +227,7 @@ type navGroep struct {
 
 // vulNavigatie: de ruimtes per soort, Mijn documenten en Beheer.
 func (a *App) vulNavigatie(ctx context.Context, v *Verkenner, s *Sessie) error {
-	koppen := []struct{ soort, kop string }{{"cooperatie", "Coöperatie"}, {"werkgroep", "Werkgroepen"}, {"project", "Projecten"}, {"gedeeld", "Gedeeld met jou"}}
+	koppen := []struct{ soort, kop string }{{"cooperatie", orgSoort(true)}, {"werkgroep", "Werkgroepen"}, {"project", "Projecten"}, {"gedeeld", "Gedeeld met jou"}}
 	for _, k := range koppen {
 		g := navGroep{Kop: k.kop}
 		for _, r := range v.Ruimtes {

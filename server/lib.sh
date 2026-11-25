@@ -20,7 +20,79 @@ moet_root() {
   [ "$(id -u)" -eq 0 ] || stop "Start dit script met sudo ervoor, bijvoorbeeld: sudo $0"
 }
 
-dc() { docker compose -f "$DG_MAP/$COMPOSE" --project-directory "$DG_MAP" --env-file "$DG_MAP/.env" "$@"; }
+# --- Organisatie en modules (organisatie.yml) ----------------------------------
+# server/organisatie.py zet organisatie.yml om in organisatie.env (naam,
+# huisstijl, DG_MODULES) voor docker compose. bijwerken.sh doet dat bij elke
+# uitrol; zonder organisatie.env staat alles aan, zoals vóór 0.23.0.
+DG_ORG_ENV="$DG_STAAT/organisatie.env"
+ALLE_MODULES="basis ledenbeheer berichten agenda kennis architectuur bestanden chat community instellingen beheer projecten"
+
+organisatie_lezen() {
+  local tijdelijk
+  install -d -m 755 "$DG_STAAT"
+  tijdelijk="$(mktemp "$DG_ORG_ENV.XXXXXX")"
+  if ! python3 -I "$DG_MAP/server/organisatie.py" env "$DG_MAP/organisatie.yml" > "$tijdelijk"; then
+    rm -f "$tijdelijk"; return 1
+  fi
+  chmod 644 "$tijdelijk"
+  mv "$tijdelijk" "$DG_ORG_ENV"
+}
+
+# De modules die aan staan, met spaties; altijd met basis.
+modules() {
+  local lijst
+  lijst="$(sed -n "s/^DG_MODULES='\(.*\)'$/\1/p" "$DG_ORG_ENV" 2>/dev/null || true)"
+  if [ -n "$lijst" ]; then echo "${lijst//,/ }"; else echo "$ALLE_MODULES"; fi
+}
+module_aan() { [[ " $(modules) " == *" $1 "* ]]; }
+
+# Een waarde uit organisatie.env: org_waarde ORG_NAAM.
+org_waarde() {
+  local w
+  w="$(sed -n "s/^$1='\\(.*\\)'$/\\1/p" "$DG_ORG_ENV" 2>/dev/null || true)"
+  if [ -z "$w" ] && [ "$1" = ORG_NAAM ]; then w=Gemeenschapsplatform; fi
+  printf '%s' "$w"
+}
+
+# De Caddy-blokken van de modules die aan staan naar $DG_STAAT/caddy (in de
+# proxy: /etc/caddy-actief). In dezelfde map blijven: de proxy ziet die map
+# via een koppeling, en een vervangen map zou hij niet zien.
+caddy_modules() {
+  local doel="$DG_STAAT/caddy" m
+  install -d -m 755 "$doel" "$doel/hoofd"
+  rm -f "$doel"/*.caddy "$doel"/hoofd/*.caddy
+  for m in $(modules); do
+    if [ -f "$DG_MAP/caddy/modules/$m.caddy" ]; then install -m 644 "$DG_MAP/caddy/modules/$m.caddy" "$doel/$m.caddy"; fi
+    if [ -f "$DG_MAP/caddy/modules/$m.hoofd.caddy" ]; then install -m 644 "$DG_MAP/caddy/modules/$m.hoofd.caddy" "$doel/hoofd/$m.caddy"; fi
+  done
+}
+
+# Stopt de containers van modules die uit staan. Hun volumes (de gegevens)
+# blijven; de module weer aanzetten brengt alles terug.
+modules_uit_zetten() {
+  local m actief profiel uit
+  actief="$(dc config --services | sort)"
+  for m in $ALLE_MODULES; do
+    module_aan "$m" && continue
+    profiel="$(dc --profile "$m" config --services | sort)"
+    uit="$(comm -13 <(echo "$actief") <(echo "$profiel") | tr '\n' ' ')"
+    [ -n "${uit// /}" ] || continue
+    # shellcheck disable=SC2086  # bewust gesplitst: de namen van de diensten
+    if [ -n "$(dc --profile "$m" ps -q $uit 2>/dev/null)" ]; then
+      dc --profile "$m" rm -s -f $uit >/dev/null 2>&1 || waarschuw "Module $m: stoppen lukte niet"
+      ok "Module $m staat uit: $uit gestopt (de gegevens blijven)"
+    fi
+  done
+}
+
+# docker compose voor dit platform. Elke module (behalve basis) is een profiel
+# in compose.yml; alleen de modules die aan staan, doen mee.
+dc() {
+  local args=(-f "$DG_MAP/$COMPOSE" --project-directory "$DG_MAP" --env-file "$DG_MAP/.env") m
+  [ -f "$DG_ORG_ENV" ] && args+=(--env-file "$DG_ORG_ENV")
+  for m in $(modules); do [ "$m" = basis ] || args+=(--profile "$m"); done
+  docker compose "${args[@]}" "$@"
+}
 
 # Het publieke IPv4-adres: het bronadres van de route naar buiten.
 publiek_ip() {
@@ -115,10 +187,25 @@ wijst_hier() { [ "$(getent ahostsv4 "$1" | awk 'NR==1{print $1}')" = "$(publiek_
 # de documenten en beheer zodra hun naam naar deze server wijst.
 controle_adressen() {
   local domein="$1"
-  echo "$domein/" "aanmelden.$domein/realms/gemeenschap/.well-known/openid-configuration" "projecten.$domein/login"
-  if wijst_hier "kennis.$domein"; then echo "kennis.$domein/healthz"; fi
-  if wijst_hier "documenten.$domein"; then echo "documenten.$domein/healthz"; fi
-  if wijst_hier "beheer.$domein"; then echo "beheer.$domein/healthz"; fi
+  echo "$domein/" "aanmelden.$domein/realms/gemeenschap/.well-known/openid-configuration"
+  if module_aan projecten; then echo "projecten.$domein/login"; fi
+  if module_aan kennis && wijst_hier "kennis.$domein"; then echo "kennis.$domein/healthz"; fi
+  if module_aan bestanden && wijst_hier "documenten.$domein"; then echo "documenten.$domein/healthz"; fi
+  if module_aan beheer && wijst_hier "beheer.$domein"; then echo "beheer.$domein/healthz"; fi
+}
+
+# De namen in DNS die deze server nodig heeft, voor de modules die aan staan.
+dns_namen() {
+  local domein="$1"
+  echo "$domein" "www.$domein" "aanmelden.$domein"
+  module_aan projecten && echo "projecten.$domein"
+  module_aan community && echo "forum.$domein"
+  module_aan kennis && echo "kennis.$domein"
+  module_aan architectuur && echo "architectuur.$domein"
+  module_aan bestanden && echo "documenten.$domein"
+  module_aan beheer && echo "beheer.$domein"
+  module_aan chat && echo "chat.$domein" "matrix.$domein" "matrix-auth.$domein"
+  return 0
 }
 
 gezond() {

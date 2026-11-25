@@ -65,15 +65,20 @@ declare -A BESTANDEN=(
   [beheer]="beheer-logboek.jsonl"
 )
 ALLE=(keycloak wordpress redmine kennisbank documenten beheer)
+# De module waar een onderdeel bij hoort (organisatie.yml); staat die uit, dan
+# draait het onderdeel niet en kan het niet terug.
+declare -A MODULE=([keycloak]=basis [wordpress]=basis [redmine]=projecten [kennisbank]=kennis [documenten]=bestanden [beheer]=beheer)
 GEKOZEN=()
 if [ $# -gt 0 ]; then
   for o in "$@"; do
     [[ -n "${BESTANDEN[$o]:-}" ]] || stop "Onbekend onderdeel: $o (kies uit: ${ALLE[*]})."
+    module_aan "${MODULE[$o]}" || stop "$o: de module ${MODULE[$o]} staat uit (organisatie.yml). Zet hem eerst aan."
     GEKOZEN+=("$o")
   done
 else
   for o in "${ALLE[@]}"; do
     [ -f "$MAP/${BESTANDEN[$o]%% *}" ] || continue
+    module_aan "${MODULE[$o]}" || { waarschuw "$o overgeslagen: de module ${MODULE[$o]} staat uit"; continue; }
     if [ "$PROEF" = 1 ] || vraag_ja "  $o terugzetten uit $(basename "$MAP")?"; then GEKOZEN+=("$o"); fi
   done
 fi

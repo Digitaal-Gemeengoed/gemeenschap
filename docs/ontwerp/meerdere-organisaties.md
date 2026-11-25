@@ -188,6 +188,18 @@ Wie wat mag, regelt de organisatie op GitHub. Bijvoorbeeld: de redactie maakt pu
 3. **NL-DIT neerzetten** op de nieuwe VPS, met eigen domein, SMTP, huisstijl en inhoud.
 4. **Netwerk:** de netwerk-API in dg-beheer, de pagina *Mijn platforms*, gekoppeld inloggen met toestemming, en daarna de koppeling van DGG en NL-DIT na afspraak tussen de twee organisaties.
 
+### Stand van fase 1 (branch `fase-1-algemeen`, 25 november 2026)
+
+Gedaan: `organisatie.yml` met de lezer `server/organisatie.py`; modules als Compose-profielen en eigen Caddy-bestanden; WordPress, de serverscripts, de back-up en de controles per module; Redmine optioneel; naam, soort en kleuren uit de configuratie in de code; logo en icoon via `/huisstijl/`.
+
+Nog niet, voor NL-DIT nodig (fase 2 en 3):
+- **Een standaardthema.** Het WordPress-thema is nog dat van DGG: logo, kleuren en de voet ("© Stichting Digitaal GemeenGoed · in samenwerking met NL-Dit").
+- **Inlogscherm:** de kleuren van Keycloak staan nog vast in het thema van DGG.
+- **Werkgroepen en fora:** `dg_werkgroepen()` maakt nog de werkgroepen van DGG aan (Common Ground, Open Overheid …). Die moeten uit de organisatie-repo komen.
+- **Inhoud:** de pagina's (`inhoud/`) en de startinhoud van de kennisbank zijn van DGG; die gaan naar de organisatie-repo.
+- **Keycloak:** de clients van modules die uit staan, blijven in de realm staan (onschadelijk, maar niet netjes).
+- **Een paar teksten** noemen Redmine ook als projecten uit staat (Documenten: "Mijn documenten", Beheer: meldingen na een wijziging).
+
 ## Open vragen
 
 - Het domein van NL-DIT, en de SMTP-dienst (en het afzendadres) die NL-DIT gebruikt.

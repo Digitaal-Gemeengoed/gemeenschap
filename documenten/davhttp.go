@@ -80,7 +80,7 @@ func (a *App) davMetWachtwoord(h http.Handler) http.Handler {
 			}
 		}
 		if s == nil {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Documenten Digitaal GemeenGoed", charset="UTF-8"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Documenten `+strings.ReplaceAll(orgNaam(), `"`, "")+`", charset="UTF-8"`)
 			http.Error(w, "Log in met je e-mailadres en een app-wachtwoord (Documenten → Netwerkschijf koppelen).", http.StatusUnauthorized)
 			return
 		}

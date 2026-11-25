@@ -83,11 +83,11 @@
   <tbody>
   {{range $v.Ruimtes}}
   <tr><td><a class="naam schijf" href="/r/{{.Sleutel}}">{{.Naam}}</a></td>
-      <td>{{if eq .Soort "cooperatie"}}<span class="chip groen">Coöperatie</span>{{else if eq .Soort "werkgroep"}}<span class="chip paars">Werkgroep</span>{{else if eq .Soort "persoonlijk"}}<span class="chip grijs">Persoonlijk</span>{{else}}<span class="chip">Project</span>{{end}}{{if eq .Status "gesloten"}} <span class="chip grijs">{{if eq .Soort "persoonlijk"}}Bevroren{{else}}Gesloten{{end}}</span>{{end}}</td>
+      <td>{{if eq .Soort "cooperatie"}}<span class="chip groen">{{Soort}}</span>{{else if eq .Soort "werkgroep"}}<span class="chip paars">Werkgroep</span>{{else if eq .Soort "persoonlijk"}}<span class="chip grijs">Persoonlijk</span>{{else}}<span class="chip">Project</span>{{end}}{{if eq .Status "gesloten"}} <span class="chip grijs">{{if eq .Soort "persoonlijk"}}Bevroren{{else}}Gesloten{{end}}</span>{{end}}</td>
       <td>{{if .Niveau}}{{niveau .Niveau}}{{else}}<span class="zacht">Alleen enkele mappen</span>{{end}}</td>
       <td class="r">{{.Aantal}} document{{if ne .Aantal 1}}en{{end}}{{if .Aantal}} · {{grootte .Grootte}}{{end}}</td></tr>
   {{else}}
-  <tr><td colspan="4" class="leeg">Je hebt nog geen ruimtes. De ruimte van de coöperatie is voor members en de kerngroep; een projectruimte voor wie in Redmine aan dat project meewerkt.{{with $v.Redmine}} <a href="{{.}}">Naar de projecten in Redmine</a>{{end}}</td></tr>
+  <tr><td colspan="4" class="leeg">Je hebt nog geen ruimtes. De ruimte van de {{soort}} is voor members en de kerngroep; een projectruimte voor wie in Redmine aan dat project meewerkt.{{with $v.Redmine}} <a href="{{.}}">Naar de projecten in Redmine</a>{{end}}</td></tr>
   {{end}}
   </tbody></table>
 {{else}}
@@ -278,7 +278,7 @@
 {{define "tab-info-map"}}{{$v := .A}}{{$rm := $v.Ruimte}}
   <dl class="feiten">
     {{if $v.Map}}<dt>Locatie</dt><dd>{{$rm.Naam}}{{range $v.Pad}} › {{.Naam}}{{end}}</dd>
-    {{else}}<dt>Soort ruimte</dt><dd>{{if eq $rm.Soort "cooperatie"}}Coöperatie: voor members en de kerngroep{{else if eq $rm.Soort "werkgroep"}}Werkgroep: voor de leden van de groep op de site{{else if eq $rm.Soort "persoonlijk"}}Persoonlijk{{else}}Project: voor wie in Redmine aan het project meewerkt{{end}}</dd>{{end}}
+    {{else}}<dt>Soort ruimte</dt><dd>{{if eq $rm.Soort "cooperatie"}}{{Soort}}: voor members en de kerngroep{{else if eq $rm.Soort "werkgroep"}}Werkgroep: voor de leden van de groep op de site{{else if eq $rm.Soort "persoonlijk"}}Persoonlijk{{else}}Project: voor wie in Redmine aan het project meewerkt{{end}}</dd>{{end}}
     {{with $v.Omvang}}<dt>Inhoud</dt><dd>{{.Documenten}} document{{if ne .Documenten 1}}en{{end}}, {{.Mappen}} map{{if ne .Mappen 1}}pen{{end}}{{if .Documenten}} · {{grootte .Grootte}}{{end}}<br><small class="zacht">met alles eronder dat je mag zien</small></dd>{{end}}
     {{with $v.Map}}<dt>Aangemaakt</dt><dd>{{datum .Aangemaakt}}<br>{{.AangemaaktDoorNaam}}</dd>{{end}}
     <dt>Toegang</dt><dd>{{if $v.Besloten}}<span class="chip paars"><span class="i i-slot" aria-hidden="true"></span>Besloten</span> alleen eigen regels{{else if $v.Map}}zoals de map erboven{{else}}de standaard van de ruimte{{end}} · <a href="{{$v.ToegangURL}}">bekijken</a></dd>
@@ -321,7 +321,7 @@
     <button type="button" class="licht" data-kopieer="deellink">Kopiëren</button>
   </div>
   <p class="zacht klein">Alleen wie toegang heeft, kan de link openen; anderen komen bij het inloggen uit.</p>
-  {{$tekst := printf "%s · Documenten van Digitaal GemeenGoed (voor leden)" $v.DeelNaam}}
+  {{$tekst := printf "%s · Documenten van %s (voor leden)" $v.DeelNaam org}}
   <div class="sociaal">
     <button type="button" class="licht" data-webshare data-titel="{{$v.DeelNaam}}" data-tekst="{{$tekst}}" data-link="{{$v.Link}}" hidden>Delen via…</button>
     <a class="knop licht" href="mailto:?subject={{urlquery $v.DeelNaam}}&amp;body={{urlquery $tekst}}%0A%0A{{urlquery $v.Link}}">E-mail</a>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — crowdfunding
+ * Plugin Name: Gemeenschapsplatform — crowdfunding
  * Description: Gemeenten geven op de site een intentie door om bij te dragen aan een project. De kerngroep zet een intentie op "bevestigd" zodra de samenwerkingsovereenkomst is getekend. Shortcode [dg_campagne], beheer onder Toezeggingen.
  *
  * Een campagne staat als kaart in inhoud/ (regels campagne:, doel: en
@@ -16,6 +16,11 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Alleen als de module projecten aan staat (organisatie.yml, dg-platform.php).
+if ( function_exists( 'dg_module' ) && ! dg_module( 'projecten' ) ) {
+	return;
+}
 
 const DG_CF_DB_VERSIE = 1;
 const DG_CF_STATUSSEN = array(

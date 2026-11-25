@@ -34,6 +34,10 @@ matrix_bestanden() {
            MATRIX_DB_WACHTWOORD MAS_DB_WACHTWOORD MATRIX_MAS_GEHEIM MAS_VERSLEUTEL MATRIX_KC_SECRET; do
     printf -v "$v" '%s' "$(env_waarde "$v")"
   done
+  # Naam van de organisatie (organisatie.yml).
+  local ORG_NAAM ORG_KORT
+  ORG_NAAM="$(org_waarde ORG_NAAM)"
+  ORG_KORT="$(org_waarde ORG_KORT)"; ORG_KORT="${ORG_KORT:-$ORG_NAAM}"
   SMTP_WACHTWOORD="$(yaml_tekst "$(env_waarde SMTP_WACHTWOORD)")"
   SMTP_GEBRUIKER="$(yaml_tekst "$SMTP_GEBRUIKER")"
   install -d -m 700 "$m"
@@ -59,8 +63,8 @@ matrix_bestanden() {
   smtp_pass: \"${SMTP_WACHTWOORD:-}\"
   force_tls: $([ "${SMTP_POORT:-587}" = 465 ] && echo true || echo false)
   require_transport_security: true
-  notif_from: \"Chat · Digitaal GemeenGoed <${SMTP_AFZENDER:-noreply@$DOMEIN}>\"
-  app_name: Chat · Digitaal GemeenGoed
+  notif_from: \"Chat · $ORG_NAAM <${SMTP_AFZENDER:-noreply@$DOMEIN}>\"
+  app_name: Chat · $ORG_NAAM
   enable_notifs: true
   notif_for_new_users: true
   client_base_url: https://chat.$DOMEIN
@@ -146,8 +150,8 @@ EOF
   port: ${SMTP_POORT:-587}
   username: \"${SMTP_GEBRUIKER:-}\"
   password: \"${SMTP_WACHTWOORD:-}\"
-  from: '\"Chat · Digitaal GemeenGoed\" <${SMTP_AFZENDER:-noreply@$DOMEIN}>'
-  reply_to: '\"Digitaal GemeenGoed\" <${SMTP_AFZENDER:-noreply@$DOMEIN}>'"
+  from: '\"Chat · $ORG_NAAM\" <${SMTP_AFZENDER:-noreply@$DOMEIN}>'
+  reply_to: '\"$ORG_NAAM\" <${SMTP_AFZENDER:-noreply@$DOMEIN}>'"
   fi
   local realm="https://aanmelden.$DOMEIN/realms/gemeenschap" intern="http://keycloak:8080/realms/gemeenschap/protocol/openid-connect"
   umask 077
@@ -190,13 +194,13 @@ account:
 email:
   $smtp
 branding:
-  service_name: "Chat · Digitaal GemeenGoed"
+  service_name: "Chat · $ORG_NAAM"
   policy_uri: "https://$DOMEIN/privacy/"
   tos_uri: "https://$DOMEIN/voorwaarden/"
 upstream_oauth2:
   providers:
     - id: $MAS_KEYCLOAK_ID
-      human_name: "je DGG-account"
+      human_name: "je $ORG_KORT-account"
       issuer: "$realm"
       # De browser gaat naar het openbare adres; tokens haalt MAS binnen het
       # Docker-netwerk op.
@@ -230,7 +234,7 @@ EOF
   "default_server_config": {
     "m.homeserver": { "base_url": "https://matrix.$DOMEIN", "server_name": "$DOMEIN" }
   },
-  "brand": "Chat · Digitaal GemeenGoed",
+  "brand": "Chat · $ORG_NAAM",
   "disable_custom_urls": true,
   "disable_guests": true,
   "disable_3pid_login": true,
@@ -266,7 +270,7 @@ EOF
 matrix_bot() {
   grep -qE '^MATRIX_BOT_TOKEN=.+' .env && return 0
   wacht "MAS" 30 mas_klaar || { waarschuw "MAS draait niet; de kamers worden (nog) niet bijgehouden. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs mas"; return 0; }
-  dc exec -T mas mas-cli manage register-user --username documenten --display-name "Digitaal GemeenGoed" --no-admin --yes >/dev/null 2>&1 || true
+  dc exec -T mas mas-cli manage register-user --username documenten --display-name "$(org_waarde ORG_NAAM)" --no-admin --yes >/dev/null 2>&1 || true
   local token
   token="$(dc exec -T mas mas-cli manage issue-compatibility-token documenten --device-id DOCUMENTEN --yes-i-want-to-grant-synapse-admin-privileges 2>&1 | grep -oE 'mct_[A-Za-z0-9_]+' | head -n1)"
   if [ -z "$token" ]; then

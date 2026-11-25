@@ -1,5 +1,5 @@
-# De kennisbank: Wiki.js 2 (AGPL-3.0) met de vertalingen in de image, het logo
-# van Digitaal GemeenGoed en offline-modus. Offline: de wiki haalt geen
+# De kennisbank: Wiki.js 2 (AGPL-3.0) met de vertalingen in de image en
+# offline-modus. Het logo komt van /huisstijl/ (Caddy, huisstijl/ in de repo). Offline: de wiki haalt geen
 # vertalingen of updates op bij de dienst van Wiki.js; wat hij nodig heeft,
 # zit in de image. Gebouwd vanuit de hoofdmap van de repo (compose.yml).
 ARG WIKI_VERSIE=2
@@ -18,6 +18,5 @@ RUN set -eux; \
     done; \
     node -e 'const fs=require("fs"),f="locales.json",d=JSON.parse(fs.readFileSync(f));d.data.localization.locales=d.data.localization.locales.filter(l=>["en","nl"].includes(l.code));fs.writeFileSync(f,JSON.stringify(d))'; \
     chown -R node:node /wiki/data
-COPY --chown=node:node wordpress/thema/digitaalgemeengoed/assets/icoon.png /wiki/assets/dgg/icoon.png
 COPY --chown=node:node wiki/config.yml /wiki/config.yml
 USER node

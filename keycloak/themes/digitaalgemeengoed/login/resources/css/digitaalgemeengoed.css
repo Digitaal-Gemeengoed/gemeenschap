@@ -25,6 +25,6 @@
   width: 56px;
   height: 110px;
   margin: 0 auto .5rem;
-  background: url("../img/uil.png") center / contain no-repeat;
+  background: url("/huisstijl/logo.png") center / contain no-repeat;
 }
 #kc-header-wrapper, #kc-header-wrapper * { font-weight: 700; letter-spacing: 0.01em; color: var(--dg-blauw-donker) !important; }

@@ -123,6 +123,10 @@ func grootte(n int64) string {
 
 func (a *App) laadSjablonen() {
 	functies := template.FuncMap{
+		// De organisatie (organisatie.yml): naam en soort ("coöperatie").
+		"org":   orgNaam,
+		"soort": func() string { return orgSoort(false) },
+		"Soort": func() string { return orgSoort(true) },
 		// De hoofdpagina (het logo en de naam linken daarheen).
 		"site":      func() string { return strings.TrimRight(a.Links.Site, "/") },
 		"datum":     datum,
@@ -335,7 +339,7 @@ func (a *App) metToegang(h func(http.ResponseWriter, *http.Request, *Sessie)) ht
 			return
 		}
 		if !rol.Toegang() {
-			a.fout(w, r, s, http.StatusForbidden, "Beheer is er voor de beheerders van het platform en de kerngroep van de coöperatie. Hoor je daarbij en zie je dit toch, log dan uit en weer in.")
+			a.fout(w, r, s, http.StatusForbidden, "Beheer is er voor de beheerders van het platform en de kerngroep van de "+orgSoort(false)+". Hoor je daarbij en zie je dit toch, log dan uit en weer in.")
 			return
 		}
 		s.Rol = rol

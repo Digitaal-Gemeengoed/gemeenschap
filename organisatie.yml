@@ -1,0 +1,40 @@
+# Wie deze site is en welke onderdelen aan staan.
+#
+# Een wijziging hier gaat mee met de volgende versie-tag (zoals alle
+# infrastructuur). Het domein en de geheimen staan niet hier maar in .env op
+# de server. Zie docs/ontwerp/meerdere-organisaties.md.
+
+# De naam zoals bezoekers hem zien, en een korte vorm (in knoppen en mails).
+naam: Digitaal GemeenGoed
+kort: DGG
+# De rechtspersoon achter het platform (voorwaarden, kennisbank, colofon).
+organisatie: Stichting Digitaal GemeenGoed
+# Wat voor gemeenschap het is, in een zin als "de leden van de coöperatie".
+soort: coöperatie
+# Eén regel onder de naam.
+omschrijving: Community voor open source en Common Ground in de overheid
+# Op het dashboard, onder "Welkom in de <kort>-community!".
+welkom: Dé plek voor gemeentelijke professionals, developers, beheerders en beleidsmakers die samen werken aan open, betrouwbare en herbruikbare overheidssoftware.
+
+# De onderdelen. "basis" staat altijd aan: site, leden en profielen, inloggen
+# (Keycloak), pagina's uit Git en het dashboard. Weglaten = uit; de gegevens
+# blijven bewaard, en weer toevoegen zet het onderdeel terug.
+modules:
+  - ledenbeheer     # CiviCRM: contacten, mailings, toestemmingen
+  - berichten       # nieuws, berichten en persoonlijke berichten
+  - agenda          # bijeenkomsten (heeft berichten nodig)
+  - kennis          # kennisbank (Wiki.js), kennis.<domein>
+  - architectuur    # architectuurmodellen (Archi), architectuur.<domein>
+  - bestanden       # documenten (WebDAV, zoeken), documenten.<domein>
+  - chat            # chat (Matrix), chat.<domein>, matrix.<domein>, matrix-auth.<domein>
+  - community       # werkgroepen en fora, forum.<domein>
+  - instellingen    # eigen account en meldingen
+  - beheer          # beheerscherm, beheer.<domein>
+  - projecten       # projecten (Redmine), projectvoorstellen, toezeggingen, projecten.<domein>
+
+# De huisstijl. Het logo en het icoon staan in huisstijl/ (logo.png: groot,
+# bijvoorbeeld op het inlogscherm; icoon.png: vierkant, linksboven).
+huisstijl:
+  kleur: "#14478f"          # hoofdkleur: knoppen, links
+  kleur_donker: "#0a2654"   # koppen, balken
+  kleur_link: "#1a56a8"

@@ -197,6 +197,10 @@ func soortNaam(mt, naam string) string {
 
 func (a *App) laadSjablonen() {
 	functies := template.FuncMap{
+		// De organisatie (organisatie.yml): naam en soort ("coöperatie").
+		"org":   orgNaam,
+		"soort": func() string { return orgSoort(false) },
+		"Soort": func() string { return orgSoort(true) },
 		// De hoofdpagina (het logo en de naam linken daarheen).
 		"site":    func() string { return strings.TrimRight("https://"+os.Getenv("WORDPRESS_HOST"), "/") },
 		"grootte": grootte,

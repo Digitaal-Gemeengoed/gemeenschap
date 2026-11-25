@@ -1,0 +1,10 @@
+# Module beheer (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+# Beheer (dg-beheer): voor de beheerders van het platform en de kerngroep.
+# De dienst controleert zelf wie er binnenkomt (Keycloak).
+beheer.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	reverse_proxy beheer:8080
+}

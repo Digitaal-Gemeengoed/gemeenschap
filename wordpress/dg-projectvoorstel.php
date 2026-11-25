@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — projectvoorstellen
+ * Plugin Name: Gemeenschapsplatform — projectvoorstellen
  * Description: Een lid stelt op de site een nieuw project voor (shortcode [dg_project_starten]). Het voorstel wordt een issue in Redmine (project "projectvoorstellen"), toegewezen aan de kerngroep. WordPress bewaart niets: Redmine is de bron.
  *
  * Verloop: het formulier → issue in Redmine (status Nieuw, naar de groep
@@ -17,6 +17,11 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Alleen als de module projecten aan staat (organisatie.yml, dg-platform.php).
+if ( function_exists( 'dg_module' ) && ! dg_module( 'projecten' ) ) {
+	return;
+}
 
 const DG_PV_PROJECT = 'projectvoorstellen';
 // Ook in redmine/redmine_groepen.py: namen die Documenten of Redmine zelf gebruikt.

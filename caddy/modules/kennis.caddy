@@ -1,0 +1,11 @@
+# Module kennis (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+# De kennisbank (Wiki.js). Alleen voor leden: dat regelt de wiki zelf (gasten
+# mogen niets en worden naar het inloggen via Keycloak gestuurd).
+kennis.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	encode zstd gzip
+	reverse_proxy wiki:3000
+}

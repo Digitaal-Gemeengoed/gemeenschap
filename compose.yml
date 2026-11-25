@@ -25,8 +25,21 @@ x-smtp: &smtp
   SMTP_WACHTWOORD: ${SMTP_WACHTWOORD:-}
   SMTP_AFZENDER: ${SMTP_AFZENDER:-noreply@${DOMEIN}}
 
+# Wie de site is en welke modules aan staan (organisatie.yml, via organisatie.env).
+x-organisatie: &organisatie
+  ORG_NAAM: ${ORG_NAAM:-}
+  ORG_KORT: ${ORG_KORT:-}
+  ORG_ORGANISATIE: ${ORG_ORGANISATIE:-}
+  ORG_SOORT: ${ORG_SOORT:-}
+  ORG_OMSCHRIJVING: ${ORG_OMSCHRIJVING:-}
+  ORG_WELKOM: ${ORG_WELKOM:-}
+  ORG_KLEUR: ${ORG_KLEUR:-}
+  ORG_KLEUR_DONKER: ${ORG_KLEUR_DONKER:-}
+  ORG_KLEUR_LINK: ${ORG_KLEUR_LINK:-}
+  DG_MODULES: ${DG_MODULES:-}
+
 x-wordpress-omgeving: &wordpress-omgeving
-  <<: *smtp
+  <<: [*smtp, *organisatie]
   WORDPRESS_DB_HOST: wp-db
   WORDPRESS_DB_NAME: wordpress
   WORDPRESS_DB_USER: wordpress
@@ -42,8 +55,8 @@ x-wordpress-omgeving: &wordpress-omgeving
   # Waar een pagina uit inhoud/ op GitHub staat (link "Bewerken op GitHub").
   DG_INHOUD_REPO: ${DG_INHOUD_REPO:-https://github.com/Digitaal-Gemeengoed/gemeenschap/blob/main/inhoud}
   # Redmine voor het dashboard (dg-dashboard.php): intern voor de API, publiek voor links.
-  DG_REDMINE_INTERN: http://redmine:3000
-  DG_REDMINE_URL: https://projecten.${DOMEIN}
+  DG_REDMINE_INTERN: ${MODULE_PROJECTEN:+http://redmine:3000}
+  DG_REDMINE_URL: ${MODULE_PROJECTEN:+https://projecten.${DOMEIN}}
   # Projectvoorstellen (dg-projectvoorstel.php): het account "site" in Redmine, geen beheerder.
   DG_REDMINE_SITE_KEY: ${REDMINE_SITE_API_KEY:?}
   # Inloggen via Keycloak (gelezen door wp-content/mu-plugins/dg-gemeenschap.php).
@@ -58,6 +71,8 @@ x-wordpress-omgeving: &wordpress-omgeving
 
 x-wordpress-mappen: &wordpress-mappen
   - wphtml:/var/www/html
+  # Organisatie en modules (organisatie.yml): als eerste geladen.
+  - ./wordpress/dg-platform.php:/var/www/html/wp-content/mu-plugins/dg-0-platform.php:ro
   - ./wordpress/dg-gemeenschap.php:/var/www/html/wp-content/mu-plugins/dg-gemeenschap.php:ro
   - ./wordpress/dg-inhoud.php:/var/www/html/wp-content/mu-plugins/dg-inhoud.php:ro
   - ./wordpress/dg-dashboard.php:/var/www/html/wp-content/mu-plugins/dg-dashboard.php:ro
@@ -78,12 +93,31 @@ services:
       - "443:443"
     environment:
       DOMEIN: ${DOMEIN:?}
+      # De kleuren voor /huisstijl/kleuren.css (organisatie.yml).
+      ORG_KLEUR: ${ORG_KLEUR:-}
+      ORG_KLEUR_DONKER: ${ORG_KLEUR_DONKER:-}
+      ORG_KLEUR_LINK: ${ORG_KLEUR_LINK:-}
     volumes:
       - ./caddy:/etc/caddy:ro
+      # Logo en icoon (organisatie.yml, huisstijl/), op elk adres onder /huisstijl/.
+      - ./huisstijl:/srv/huisstijl:ro
+      # De subdomeinen van de modules die aan staan (server/bijwerken.sh, caddy_modules).
+      - /var/lib/dg-gemeenschap/caddy:/etc/caddy-actief:ro
       - caddydata:/data
       # De HTML-rapporten van de architectuurmodellen (server/architectuur.sh).
       - /srv/dg-architectuur:/srv/architectuur:ro
-    depends_on: [wordpress, keycloak, redmine, wiki, oauth2-proxy, documenten, synapse, mas, element]
+    # De onderdelen van modules die uit staan, zijn er niet: dan niet wachten.
+    depends_on:
+      wordpress: { condition: service_started }
+      keycloak: { condition: service_started }
+      redmine: { condition: service_started, required: false }
+      wiki: { condition: service_started, required: false }
+      oauth2-proxy: { condition: service_started, required: false }
+      documenten: { condition: service_started, required: false }
+      beheer: { condition: service_started, required: false }
+      synapse: { condition: service_started, required: false }
+      mas: { condition: service_started, required: false }
+      element: { condition: service_started, required: false }
 
   # --- Keycloak: de bron voor leden, organisaties, groepen en toestemmingen ----
   keycloak-db:
@@ -135,7 +169,7 @@ services:
     image: adorsys/keycloak-config-cli:${KEYCLOAK_CONFIG_VERSIE:-6.5.1-26}
     profiles: ["gereedschap"]
     environment:
-      <<: *smtp
+      <<: [*organisatie, *smtp]
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_USER: ${KC_BEHEERDER:-beheer}
       KEYCLOAK_PASSWORD: ${KC_BEHEERDER_WACHTWOORD:?}
@@ -206,6 +240,7 @@ services:
       HOME: /tmp
     volumes:
       - wphtml:/var/www/html
+      - ./wordpress/dg-platform.php:/var/www/html/wp-content/mu-plugins/dg-0-platform.php:ro
       - ./wordpress/dg-gemeenschap.php:/var/www/html/wp-content/mu-plugins/dg-gemeenschap.php:ro
       - ./wordpress/dg-inhoud.php:/var/www/html/wp-content/mu-plugins/dg-inhoud.php:ro
       - ./wordpress/dg-dashboard.php:/var/www/html/wp-content/mu-plugins/dg-dashboard.php:ro
@@ -227,6 +262,7 @@ services:
 
   # --- Redmine: meldingen, wensen, roadmap, portfolio -------------------------
   redmine-db:
+    profiles: ["projecten"]
     image: postgres:16
     restart: unless-stopped
     environment:
@@ -241,6 +277,7 @@ services:
       retries: 20
 
   redmine:
+    profiles: ["projecten"]
     build:
       context: ./redmine
       args:
@@ -249,7 +286,7 @@ services:
     image: dg/redmine:${REDMINE_VERSIE:-6.1.6}
     restart: unless-stopped
     environment:
-      <<: *smtp
+      <<: [*organisatie, *smtp]
       DOMEIN: ${DOMEIN}
       REDMINE_DB_POSTGRES: redmine-db
       REDMINE_DB_USERNAME: redmine
@@ -272,6 +309,7 @@ services:
 
   # De groepen onder /netwerk in Keycloak als groepen in Redmine; elke 10 minuten.
   redmine-groepen:
+    profiles: ["projecten"]
     image: python:3.13-alpine
     restart: unless-stopped
     command: ["python", "-I", "/opt/redmine_groepen.py"]
@@ -293,6 +331,7 @@ services:
 
   # --- Kennisbank: Wiki.js (kennis.<domein>), alleen voor leden ------------------
   wiki-db:
+    profiles: ["kennis"]
     image: postgres:16
     restart: unless-stopped
     environment:
@@ -307,6 +346,7 @@ services:
       retries: 20
 
   wiki:
+    profiles: ["kennis"]
     build:
       context: .
       dockerfile: wiki/Dockerfile
@@ -329,6 +369,7 @@ services:
     profiles: ["gereedschap"]
     command: ["python", "-I", "/opt/inrichten.py"]
     environment:
+      <<: *organisatie
       DOMEIN: ${DOMEIN}
       WIKI_INTERN: http://wiki:3000
       KEYCLOAK_INTERN: http://keycloak:8080
@@ -350,6 +391,7 @@ services:
   # Caddy vraagt bij elke aanvraag aan oauth2-proxy of iemand is ingelogd bij
   # Keycloak en lid is (groep /netwerk/gebruikers).
   oauth2-proxy:
+    profiles: ["architectuur"]
     image: quay.io/oauth2-proxy/oauth2-proxy:${OAUTH2_PROXY_VERSIE:-v7.15.6}
     restart: unless-stopped
     environment:
@@ -387,6 +429,7 @@ services:
   # Een register (documenten-db) naast een objectopslag (Garage, S3). Zie
   # documenten/ONTWERP.md. Garage is alleen binnen dit netwerk bereikbaar.
   garage:
+    profiles: ["bestanden"]
     image: dxflrs/garage:${GARAGE_VERSIE:-v2.5.0}
     restart: unless-stopped
     # Eén node zonder replicatie; sleutel en bucket uit de omgeving (blijven bestaan).
@@ -402,6 +445,7 @@ services:
       - garagedata:/var/lib/garage/data
 
   documenten-db:
+    profiles: ["bestanden"]
     image: postgres:16
     restart: unless-stopped
     environment:
@@ -416,12 +460,14 @@ services:
       retries: 20
 
   documenten:
+    profiles: ["bestanden"]
     build:
       context: .
       dockerfile: documenten/Dockerfile
     image: dg/documenten:latest
     restart: unless-stopped
     environment:
+      <<: *organisatie
       DOC_BASIS_URL: https://documenten.${DOMEIN}
       OIDC_UITGEVER: https://aanmelden.${DOMEIN}/realms/gemeenschap
       OIDC_INTERN: http://keycloak:8080/realms/gemeenschap
@@ -434,9 +480,10 @@ services:
       S3_SLEUTEL: ${GARAGE_SLEUTEL:?}
       S3_GEHEIM: ${GARAGE_GEHEIM:?}
       # Projecten en hun leden (elke vijf minuten), met de API-sleutel van het noodaccount.
-      REDMINE_URL: http://redmine:3000
+      # Leeg als de module uit staat (organisatie.yml); de dienst werkt dan zonder.
+      REDMINE_URL: ${MODULE_PROJECTEN:+http://redmine:3000}
       REDMINE_API_KEY: ${REDMINE_API_KEY:?}
-      REDMINE_PUBLIEK: https://projecten.${DOMEIN}
+      REDMINE_PUBLIEK: ${MODULE_PROJECTEN:+https://projecten.${DOMEIN}}
       MAX_MB: ${DOC_MAX_MB:-500}
       # Bij het delen een bericht via de site (BuddyPress).
       DOC_BERICHT_GEHEIM: ${DOC_BERICHT_GEHEIM:?}
@@ -447,9 +494,9 @@ services:
       # Persoonlijke ruimtes (Mijn documenten): quotum in MB.
       DOC_QUOTUM_PERSOONLIJK_MB: ${DOC_QUOTUM_PERSOONLIJK_MB:-1024}
       # Chat (chat.go): een kamer per werkgroep, project en netwerkgroep. Zonder token: uit.
-      MATRIX_URL: http://synapse:8008
+      MATRIX_URL: ${MODULE_CHAT:+http://synapse:8008}
       MATRIX_SERVER: ${DOMEIN}
-      MATRIX_CHAT_URL: https://chat.${DOMEIN}
+      MATRIX_CHAT_URL: ${MODULE_CHAT:+https://chat.${DOMEIN}}
       MATRIX_BOT_TOKEN: ${MATRIX_BOT_TOKEN:-}
       # Zoeken (zoeken.go): OpenSearch, alleen intern. Leeg = zoeken staat uit.
       # Is OpenSearch er (nog) niet, dan werkt de rest gewoon en wacht de index.
@@ -477,6 +524,7 @@ services:
   # bouwt Documenten hem vanzelf opnieuw op. Vraagt vm.max_map_count=262144 op
   # de server (bijwerken.sh zet dat).
   opensearch:
+    profiles: ["bestanden"]
     image: opensearchproject/opensearch:${OPENSEARCH_VERSIE:-3.6.0}
     restart: unless-stopped
     environment:
@@ -500,6 +548,7 @@ services:
   # /var/lib/dg-gemeenschap/matrix. Inloggen alleen via Keycloak (MAS).
   # Zie README, Chat.
   matrix-db:
+    profiles: ["chat"]
     image: postgres:16
     restart: unless-stopped
     environment:
@@ -518,6 +567,7 @@ services:
       retries: 20
 
   synapse:
+    profiles: ["chat"]
     image: matrixdotorg/synapse:${SYNAPSE_VERSIE:-v1.165.0}
     restart: unless-stopped
     environment:
@@ -529,6 +579,7 @@ services:
       matrix-db: { condition: service_healthy }
 
   mas:
+    profiles: ["chat"]
     image: ghcr.io/element-hq/matrix-authentication-service:${MAS_VERSIE:-1.22.0}
     restart: unless-stopped
     command: ["server"]
@@ -541,6 +592,7 @@ services:
       matrix-db: { condition: service_healthy }
 
   element:
+    profiles: ["chat"]
     image: vectorim/element-web:${ELEMENT_VERSIE:-v1.12.32}
     restart: unless-stopped
     volumes:
@@ -551,12 +603,14 @@ services:
   # beheer-keycloak) en de stand van de server (het statusbestand van
   # server/status.sh, alleen-lezen). Zie beheer/ONTWERP.md.
   beheer:
+    profiles: ["beheer"]
     build:
       context: .
       dockerfile: beheer/Dockerfile
     image: dg/beheer:latest
     restart: unless-stopped
     environment:
+      <<: *organisatie
       BEHEER_BASIS_URL: https://beheer.${DOMEIN}
       OIDC_UITGEVER: https://aanmelden.${DOMEIN}/realms/gemeenschap
       OIDC_INTERN: http://keycloak:8080/realms/gemeenschap
@@ -566,9 +620,10 @@ services:
       KEYCLOAK_CLIENT_ID: beheer-keycloak
       KEYCLOAK_GEHEIM: ${BEHEER_KEYCLOAK_SECRET:?}
       SITE_URL: https://${DOMEIN}
-      PROJECTEN_URL: https://projecten.${DOMEIN}
-      KENNIS_URL: https://kennis.${DOMEIN}
-      DOCUMENTEN_URL: https://documenten.${DOMEIN}
+      # Leeg als de module uit staat: dan staat de link niet in beheer.
+      PROJECTEN_URL: ${MODULE_PROJECTEN:+https://projecten.${DOMEIN}}
+      KENNIS_URL: ${MODULE_KENNIS:+https://kennis.${DOMEIN}}
+      DOCUMENTEN_URL: ${MODULE_BESTANDEN:+https://documenten.${DOMEIN}}
     volumes:
       - beheerdata:/data
       - /var/lib/dg-gemeenschap/status:/status:ro

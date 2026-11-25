@@ -1,5 +1,5 @@
 [Unit]
-Description=Digitaal GemeenGoed: stand van de server voor het beheerscherm
+Description=Gemeenschapsplatform: stand van de server voor het beheerscherm
 After=docker.service
 Requires=docker.service
 

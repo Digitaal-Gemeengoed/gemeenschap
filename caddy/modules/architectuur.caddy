@@ -1,0 +1,25 @@
+# Module architectuur (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+# De architectuurmodellen: de HTML-rapporten van Archi (server/architectuur.sh
+# bouwt ze in /srv/dg-architectuur). Alleen voor leden: oauth2-proxy vraagt
+# Keycloak wie er is; wie niet is ingelogd, gaat eerst naar het inloggen.
+architectuur.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	encode zstd gzip
+	handle /oauth2/* {
+		reverse_proxy oauth2-proxy:4180
+	}
+	handle {
+		forward_auth oauth2-proxy:4180 {
+			uri /oauth2/auth
+			@niet_ingelogd status 401
+			handle_response @niet_ingelogd {
+				redir * /oauth2/start?rd={scheme}://{hostport}{uri} 302
+			}
+		}
+		root * /srv/architectuur
+		file_server
+	}
+}

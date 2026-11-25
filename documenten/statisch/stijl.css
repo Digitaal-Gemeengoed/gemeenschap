@@ -1,7 +1,9 @@
 /* Documenten · Digitaal GemeenGoed. Een verkenner in de stijl van de XENA-demo,
    met de kleuren van de site. */
+/* De kleuren van de organisatie (organisatie.yml), via Caddy. */
+@import url("/huisstijl/kleuren.css");
 :root {
-  --marine: #0a2654; --blauw: #14478f; --link: #1a56a8; --groen: #3f7f1d; --paars: #6d28d9;
+  --marine: var(--dg-kleur-donker, #0a2654); --blauw: var(--dg-kleur, #14478f); --link: var(--dg-kleur-link, #1a56a8); --groen: #3f7f1d; --paars: #6d28d9;
   --ijs: #eef7fc; --hemel: #cfeaf7; --tekst: #2b3a4e; --grijs: #55657a; --rand: #dbe6f0;
   --rood: #b42318; --wit: #fff; --vlak: #f3f6f9; --kies: #e3eef9; --zweef: #f2f7fc;
   --map: #d79b2b;
