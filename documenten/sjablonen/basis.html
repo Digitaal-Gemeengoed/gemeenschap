@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{.Titel}} · Digitaal GemeenGoed</title>
-<link rel="icon" href="/statisch/icoon.png">
+<title>{{.Titel}} · {{org}}</title>
+<link rel="icon" href="/huisstijl/icoon.png">
 <link rel="stylesheet" href="/statisch/stijl.css">
 <script src="/statisch/app.js" defer></script>
 </head>
 <body>
 <header class="kop">
-  <span class="merk"><a href="{{site}}/" title="Naar de hoofdpagina"><img src="/statisch/icoon.png" alt="Digitaal GemeenGoed" width="36" height="36"></a><span><a href="{{site}}/" title="Naar de hoofdpagina"><b>Digitaal GemeenGoed</b></a><a href="/"><small>Documenten</small></a></span></span>
+  <span class="merk"><a href="{{site}}/" title="Naar de hoofdpagina"><img src="/huisstijl/icoon.png" alt="{{org}}" width="36" height="36"></a><span><a href="{{site}}/" title="Naar de hoofdpagina"><b>{{org}}</b></a><a href="/"><small>Documenten</small></a></span></span>
   {{with .Sessie}}
   <form class="wie" method="post" action="/uitloggen">
     <span title="{{.Email}}">{{.Naam}}</span>

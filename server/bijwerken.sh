@@ -21,8 +21,12 @@ cd "$DG_MAP" || exit 1
 [ -s .env ] || stop "Nog niet geïnstalleerd. Gebruik installeer.sh."
 
 meld "Bijwerken naar $(git describe --tags --always 2>/dev/null || echo onbekend)"
+# Sinds 0.23.0: wie de site is en welke modules aan staan (organisatie.yml).
+organisatie_lezen || stop "organisatie.yml klopt niet (zie hierboven); niets bijgewerkt."
+ok "$(org_waarde ORG_NAAM), modules: $(modules)"
+caddy_modules
 # Sinds 0.14.0: OpenSearch (zoeken in Documenten) vraagt meer geheugenkaarten.
-zoek_sysctl
+if module_aan bestanden; then zoek_sysctl; fi
 vul_env_aan .env CIVICRM_VERSIE 6.20.0
 vul_env_aan .env UITROL_MELDEN ""
 # Sinds 0.8.0: de kennisbank (Wiki.js) en de architectuurmodellen.
@@ -67,14 +71,18 @@ if [ ! -f "$DG_MAP/geheimen/kennisbank" ]; then
   ok "Nieuwe sleutel voor de kennisbank-repo (geheimen/kennisbank.pub)"
 fi
 dc pull --quiet --ignore-buildable --ignore-pull-failures 2>/dev/null || true
-dc --profile gereedschap pull --quiet keycloak-config wpcli wiki-inrichten 2>/dev/null || true
+dc --profile gereedschap pull --quiet keycloak-config wpcli 2>/dev/null || true
+if module_aan kennis; then dc --profile gereedschap pull --quiet wiki-inrichten 2>/dev/null || true; fi
 dc build --quiet || stop "Bouwen mislukt."
 # Chat: de configuratie uit .env, en de sleutel van Synapse (één keer).
-matrix_bestanden
-dc run --rm -T --no-deps --entrypoint sh synapse -c \
-  'python -m synapse.app.homeserver -c /config/homeserver.yaml --generate-keys >/dev/null && chown 991:991 /data /data/signing.key' \
-  || stop "De sleutel van de chatserver maken mislukt."
+if module_aan chat; then
+  matrix_bestanden
+  dc run --rm -T --no-deps --entrypoint sh synapse -c \
+    'python -m synapse.app.homeserver -c /config/homeserver.yaml --generate-keys >/dev/null && chown 991:991 /data /data/signing.key' \
+    || stop "De sleutel van de chatserver maken mislukt."
+fi
 dc up -d --remove-orphans || stop "Starten mislukt."
+modules_uit_zetten
 # De mu-plugins van WordPress zitten als losse bestanden in de container. Git
 # vervangt een gewijzigd bestand door een nieuw; de container ziet dat pas na
 # een herstart (anders draait de oude code door tot de container opnieuw wordt
@@ -94,43 +102,58 @@ dc run --rm -T -e SMTP_SSL="$SMTP_SSL" -e SMTP_STARTTLS="$SMTP_STARTTLS" keycloa
   || { tail -n 30 /tmp/dg-keycloak-config.log; stop "Keycloak inrichten mislukt (zie hierboven)."; }
 ok "Realm bijgewerkt"
 
-meld "Kennisbank (Wiki.js) bijwerken"
-# De volumes voor de Git-werkkopie en de uploads zijn (van vóór 0.9.1) van
-# root; de wiki draait als node en moet erin kunnen schrijven.
-dc exec -T -u 0 wiki chown -R node:node /wiki/data/repo /wiki/data/content || waarschuw "Eigenaar van de wiki-mappen zetten lukte niet"
-dc run --rm -T wiki-inrichten || stop "Kennisbank inrichten mislukt; kijk in de uitvoer hierboven en met: sudo docker compose -f $DG_MAP/$COMPOSE logs wiki"
-if ! grep -qE '^KENNISBANK_REPO=.+' .env; then
-  waarschuw "De pagina's van de kennisbank gaan nog niet naar GitHub. Zet deze sleutel als deploy key (met schrijfrechten) bij de repo kennisbank:"
-  printf '      %s\n' "$(cat "$DG_MAP/geheimen/kennisbank.pub")"
-  waarschuw "en zet daarna KENNISBANK_REPO=git@github.com:Digitaal-Gemeengoed/kennisbank.git in .env (README, Kennisbank)."
+if module_aan kennis; then
+  meld "Kennisbank (Wiki.js) bijwerken"
+  # De volumes voor de Git-werkkopie en de uploads zijn (van vóór 0.9.1) van
+  # root; de wiki draait als node en moet erin kunnen schrijven.
+  dc exec -T -u 0 wiki chown -R node:node /wiki/data/repo /wiki/data/content || waarschuw "Eigenaar van de wiki-mappen zetten lukte niet"
+  dc run --rm -T wiki-inrichten || stop "Kennisbank inrichten mislukt; kijk in de uitvoer hierboven en met: sudo docker compose -f $DG_MAP/$COMPOSE logs wiki"
+  if ! grep -qE '^KENNISBANK_REPO=.+' .env; then
+    waarschuw "De pagina's van de kennisbank gaan nog niet naar GitHub. Zet deze sleutel als deploy key (met schrijfrechten) bij de repo kennisbank:"
+    printf '      %s\n' "$(cat "$DG_MAP/geheimen/kennisbank.pub")"
+    waarschuw "en zet daarna KENNISBANK_REPO=git@github.com:Digitaal-Gemeengoed/kennisbank.git in .env (README, Kennisbank)."
+  fi
 fi
 
 wacht "WordPress" 36 wordpress_klaar || stop "WordPress start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs wordpress"
 meld "WordPress bijwerken (BuddyPress, bbPress, CiviCRM, thema)"
 dc run --rm -T wpcli dg-inrichten || stop "WordPress bijwerken mislukt; kijk in de uitvoer hierboven."
 
-wacht "Redmine" 60 redmine_klaar || stop "Redmine start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs redmine"
-meld "Redmine bijwerken"
-dc exec -T -u redmine redmine bundle exec rails runner /usr/local/share/dg/inrichten.rb >/dev/null || stop "Redmine inrichten mislukt. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs redmine"
-dc restart redmine-groepen >/dev/null
+if module_aan projecten; then
+  wacht "Redmine" 60 redmine_klaar || stop "Redmine start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs redmine"
+  meld "Redmine bijwerken"
+  dc exec -T -u redmine redmine bundle exec rails runner /usr/local/share/dg/inrichten.rb >/dev/null || stop "Redmine inrichten mislukt. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs redmine"
+  dc restart redmine-groepen >/dev/null
+fi
 
-wacht "Beheer" 30 beheer_klaar || stop "De beheerdienst start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs beheer"
-ok "Beheer draait"
+if module_aan beheer; then
+  wacht "Beheer" 30 beheer_klaar || stop "De beheerdienst start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs beheer"
+  ok "Beheer draait"
+fi
 
-wacht "Documenten" 30 documenten_klaar || stop "De documentendienst start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs documenten garage"
-ok "Documenten draait"
+if module_aan bestanden; then
+  wacht "Documenten" 30 documenten_klaar || stop "De documentendienst start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs documenten garage"
+  ok "Documenten draait"
+fi
 
-wacht "de chatserver" 36 synapse_klaar || stop "De chatserver (Synapse) start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs synapse mas"
-ok "Chat draait"
-matrix_bot
+if module_aan chat; then
+  wacht "de chatserver" 36 synapse_klaar || stop "De chatserver (Synapse) start niet. Kijk met: sudo docker compose -f $DG_MAP/$COMPOSE logs synapse mas"
+  ok "Chat draait"
+  matrix_bot
+fi
 
 # Architectuurmodellen: elk kwartier bouwen wat nieuw is (architectuur/repos.txt).
-install -d -m 755 /srv/dg-architectuur
-install -m 644 "$DG_MAP/server/systemd/dg-architectuur.service" "$DG_MAP/server/systemd/dg-architectuur.timer" /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable --now dg-architectuur.timer >/dev/null 2>&1 || waarschuw "Timer dg-architectuur starten lukte niet"
-systemctl start --no-block dg-architectuur.service || true
-ok "Architectuurmodellen: elk kwartier bijwerken (systemd-timer dg-architectuur)"
+if module_aan architectuur; then
+  install -d -m 755 /srv/dg-architectuur
+  install -m 644 "$DG_MAP/server/systemd/dg-architectuur.service" "$DG_MAP/server/systemd/dg-architectuur.timer" /etc/systemd/system/
+  systemctl daemon-reload
+  systemctl enable --now dg-architectuur.timer >/dev/null 2>&1 || waarschuw "Timer dg-architectuur starten lukte niet"
+  systemctl start --no-block dg-architectuur.service || true
+  ok "Architectuurmodellen: elk kwartier bijwerken (systemd-timer dg-architectuur)"
+elif systemctl is-enabled -q dg-architectuur.timer 2>/dev/null; then
+  systemctl disable --now dg-architectuur.timer >/dev/null 2>&1 || true
+  ok "Architectuurmodellen staan uit: timer dg-architectuur gestopt"
+fi
 # Stand van de server voor het beheerscherm: elke vijf minuten.
 install -m 644 "$DG_MAP/server/systemd/dg-status.service" "$DG_MAP/server/systemd/dg-status.timer" /etc/systemd/system/
 systemctl daemon-reload

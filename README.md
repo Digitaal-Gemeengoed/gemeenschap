@@ -109,10 +109,40 @@ wiki/                       de kennisbank: image (vertalingen, logo, offline), i
 documenten/                 dg-documenten (Go): register, bestandsbeheerder, Garage-instellingen, ONTWERP.md
 beheer/                     dg-beheer (Go): leden en rollen, organisaties, platform, ONTWERP.md
 architectuur/repos.txt      de architectuurmodellen (één repo per project)
-caddy/Caddyfile             de adressen en certificaten
+organisatie.yml             wie de site is (naam, soort, huisstijl) en welke modules aan staan
+huisstijl/                  logo.png en icoon.png; op elk adres onder /huisstijl/ (ook kleuren.css)
+caddy/Caddyfile             de adressen en certificaten van de basis
+caddy/modules/              de adressen per module (alleen actief als de module aan staat)
+wordpress/dg-platform.php   mu-plugin (als eerste geladen): dg_module(), dg_org(), dg_soort()
+server/organisatie.py       leest organisatie.yml (zonder PyYAML)
 compose.yml                 alle containers
 server/                     installeren, bijwerken, uitrollen, back-up, controleren
 ```
+
+## Organisatie en modules
+
+`organisatie.yml` zegt wie de site is en welke onderdelen aan staan. Hetzelfde
+platform kan zo voor een andere organisatie draaien, met minder onderdelen
+(zie `docs/ontwerp/meerdere-organisaties.md`).
+
+- **Naam, kort, organisatie, soort, omschrijving, welkom:** in de kop, mails,
+  het inlogscherm, de kennisbank, Projecten, Documenten, Beheer en de chat.
+  `soort` is het woord in zinnen als "de leden van de coöperatie".
+- **Huisstijl:** drie kleuren in `organisatie.yml`, logo en icoon in
+  `huisstijl/`. Caddy zet ze op elk adres onder `/huisstijl/` (de kleuren als
+  `/huisstijl/kleuren.css`). Het WordPress-thema en het inlogscherm hebben nog
+  hun eigen kleuren.
+- **Modules:** basis staat altijd aan. De rest: `ledenbeheer`, `berichten`,
+  `agenda` (heeft berichten en ledenbeheer nodig), `kennis`, `architectuur`,
+  `bestanden`, `chat`, `community`, `instellingen`, `beheer`, `projecten`
+  (heeft ledenbeheer nodig). Een module uitzetten stopt haar containers en
+  haalt haar adres, menu-items en dashboardblokken weg; de gegevens blijven in
+  hun volumes. Weer aanzetten brengt alles terug.
+
+Een wijziging gaat mee met de volgende versie-tag. `bijwerken.sh` leest het
+bestand in (`/var/lib/dg-gemeenschap/organisatie.env`) en stopt als het niet
+klopt, met de reden erbij. `controleer.sh` laat zien wat er aan staat en welke
+DNS-namen nodig zijn.
 
 ## Kennisbank
 

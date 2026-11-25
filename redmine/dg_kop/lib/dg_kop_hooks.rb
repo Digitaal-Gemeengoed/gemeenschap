@@ -26,7 +26,7 @@ class DgKopHooks < Redmine::Hook::ViewListener
           a.className = 'dg-merk';
           a.href = '#{s}/';
           a.title = 'Naar de hoofdpagina';
-          a.innerHTML = '<img src="#{s}/wp-content/themes/digitaalgemeengoed/assets/icoon.png" alt="Naar de hoofdpagina">';
+          a.innerHTML = '<img src="/huisstijl/icoon.png" alt="Naar de hoofdpagina">';
           kop.insertBefore(a, kop.firstChild);
         })();
       </script>

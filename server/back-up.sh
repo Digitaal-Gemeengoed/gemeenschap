@@ -24,28 +24,43 @@ install -d -m 700 "$DOEL"
 umask 077
 
 dc exec -T keycloak-db pg_dump -U keycloak -Fc keycloak > "$DOEL/keycloak.dump"
-dc exec -T redmine-db pg_dump -U redmine -Fc redmine > "$DOEL/redmine.dump"
-dc exec -T wiki-db pg_dump -U wiki -Fc wiki > "$DOEL/kennisbank.dump"
-dc exec -T wiki tar -C /wiki/data -czf - content > "$DOEL/kennisbank-bestanden.tar.gz"
+# Alleen de modules die aan staan (organisatie.yml); van een module die uit
+# staat, bewaart het volume de gegevens, en die blijven in de laatste back-up
+# van toen hij aan stond.
+if module_aan projecten; then
+  dc exec -T redmine-db pg_dump -U redmine -Fc redmine > "$DOEL/redmine.dump"
+fi
+if module_aan kennis; then
+  dc exec -T wiki-db pg_dump -U wiki -Fc wiki > "$DOEL/kennisbank.dump"
+  dc exec -T wiki tar -C /wiki/data -czf - content > "$DOEL/kennisbank-bestanden.tar.gz"
+fi
 # Wachtwoord via de omgeving van de container, niet op de opdrachtregel.
 dc exec -T wp-db sh -c 'exec mariadb-dump -uroot -p"$MARIADB_ROOT_PASSWORD" --single-transaction --routines --triggers --databases wordpress' | gzip > "$DOEL/wordpress.sql.gz"
 dc exec -T wordpress tar -C /var/www/html -czf - wp-content/uploads > "$DOEL/wordpress-uploads.tar.gz"
-dc exec -T redmine tar -C /usr/src/redmine -czf - files > "$DOEL/redmine-bestanden.tar.gz"
+if module_aan projecten; then
+  dc exec -T redmine tar -C /usr/src/redmine -czf - files > "$DOEL/redmine-bestanden.tar.gz"
+fi
 # Documenten: eerst het register, dan de objecten. Objecten veranderen nooit;
 # daarom één spiegel voor alle nachten, die alleen aangroeit (los van de
 # mappen hierboven, die na 14 dagen verdwijnen).
-dc exec -T documenten-db pg_dump -U documenten -Fc documenten > "$DOEL/documenten.dump"
-install -d -m 700 "$DOC_SPIEGEL"
-dc run --rm -T --no-deps -u 0 -v "$DOC_SPIEGEL:/spiegel" documenten spiegel /spiegel
+if module_aan bestanden; then
+  dc exec -T documenten-db pg_dump -U documenten -Fc documenten > "$DOEL/documenten.dump"
+  install -d -m 700 "$DOC_SPIEGEL"
+  dc run --rm -T --no-deps -u 0 -v "$DOC_SPIEGEL:/spiegel" documenten spiegel /spiegel
+fi
 
 # Chat: de databases van Synapse en MAS, en de geüploade bestanden.
-dc exec -T matrix-db pg_dump -U synapse -Fc synapse > "$DOEL/chat-synapse.dump" || waarschuw "Chat (Synapse): back-up niet gelukt"
-dc exec -T matrix-db pg_dump -U synapse -Fc mas > "$DOEL/chat-mas.dump" || waarschuw "Chat (MAS): back-up niet gelukt"
-dc exec -T synapse tar -C /data -czf - media_store signing.key > "$DOEL/chat-bestanden.tar.gz" 2>/dev/null || waarschuw "Chat (bestanden): back-up niet gelukt"
-[ -d "$DG_STAAT/matrix/sleutels" ] && cp -a "$DG_STAAT/matrix/sleutels" "$DOEL/chat-sleutels"
+if module_aan chat; then
+  dc exec -T matrix-db pg_dump -U synapse -Fc synapse > "$DOEL/chat-synapse.dump" || waarschuw "Chat (Synapse): back-up niet gelukt"
+  dc exec -T matrix-db pg_dump -U synapse -Fc mas > "$DOEL/chat-mas.dump" || waarschuw "Chat (MAS): back-up niet gelukt"
+  dc exec -T synapse tar -C /data -czf - media_store signing.key > "$DOEL/chat-bestanden.tar.gz" 2>/dev/null || waarschuw "Chat (bestanden): back-up niet gelukt"
+  if [ -d "$DG_STAAT/matrix/sleutels" ]; then cp -a "$DG_STAAT/matrix/sleutels" "$DOEL/chat-sleutels"; fi
+fi
 # Het logboek van beheer (wie wijzigde welke rol, en waarom).
-dc exec -T beheer dg-beheer logboek > "$DOEL/beheer-logboek.jsonl" || waarschuw "Logboek van beheer: niet gelukt"
-[ -s "$DOEL/beheer-logboek.jsonl" ] || rm -f "$DOEL/beheer-logboek.jsonl"
+if module_aan beheer; then
+  dc exec -T beheer dg-beheer logboek > "$DOEL/beheer-logboek.jsonl" || waarschuw "Logboek van beheer: niet gelukt"
+  [ -s "$DOEL/beheer-logboek.jsonl" ] || rm -f "$DOEL/beheer-logboek.jsonl"
+fi
 
 find /var/backups/dg-gemeenschap -mindepth 1 -maxdepth 1 -type d -mtime +14 -exec rm -rf {} +
 ok "Back-up in $DOEL ($(du -sh "$DOEL" | cut -f1))"

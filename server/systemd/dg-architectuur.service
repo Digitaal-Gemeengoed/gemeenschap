@@ -1,5 +1,5 @@
 [Unit]
-Description=Digitaal GemeenGoed: architectuurmodellen bouwen (architectuur.<domein>)
+Description=Gemeenschapsplatform: architectuurmodellen bouwen (architectuur.<domein>)
 After=docker.service network-online.target
 Wants=network-online.target
 Requires=docker.service

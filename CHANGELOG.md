@@ -2,6 +2,18 @@
 
 ## Nog niet uitgebracht
 
+### 0.23.0 (in voorbereiding) — het platform algemeen maken
+
+Fase 1 uit `docs/ontwerp/meerdere-organisaties.md`. Voor Digitaal GemeenGoed verandert er (bijna) niets zichtbaars; de uitzondering staat onderaan.
+
+- **`organisatie.yml`:** naam, korte naam, rechtspersoon, soort ("coöperatie"), omschrijving, welkomsttekst, huisstijlkleuren en de modules. `server/organisatie.py` leest het in; `bijwerken.sh` stopt met een duidelijke melding als het niet klopt.
+- **Modules aan en uit:** elke module is een profiel in `compose.yml` en een eigen bestand in `caddy/modules/`. Een module die uit staat, draait niet, heeft geen adres of certificaat, en verdwijnt uit het menu, het dashboard, de profielmenu's, de back-up en de controles. De gegevens blijven bewaard. WordPress kent `dg_module()` (`wordpress/dg-platform.php`).
+- **Projecten (Redmine) is optioneel.** Dashboard, berichten, agenda, Documenten en Beheer werken zonder.
+- **Naam en soort uit de configuratie** op alle plekken waar "Digitaal GemeenGoed" of "coöperatie" in de code stond: mails, het inlogscherm, de kennisbank, Projecten, Documenten, Beheer, de chat, de agenda (iCal), de architectuurpagina.
+- **Huisstijl:** logo en icoon in `huisstijl/`, op elk adres onder `/huisstijl/`, met de kleuren als `/huisstijl/kleuren.css`. Documenten, Beheer, de kennisbank, Projecten, de architectuurpagina en het inlogscherm halen hun logo daar.
+- `controleer.sh` en `installeer.sh` vragen alleen de DNS-namen van de modules die aan staan.
+- **Zichtbaar voor DGG:** de voorwaarden op het aanmeldscherm zeiden "Digitaal GemeenGoed en NL-Dit beheren dit platform samen". Dat is nu "Stichting Digitaal GemeenGoed beheert dit platform", omdat de platforms juridisch gescheiden zijn.
+
 ## 0.22.1 — 2026-11-25
 
 - **Terug naar de hoofdpagina.** Het logo (en de naam) linksboven linkt nu op elk subdomein naar de hoofdpagina: aanmelden (Keycloak), projecten (Redmine, met de nieuwe plugin `dg_kop`), kennis (Wiki.js), documenten, beheer en de overzichtspagina van architectuur. In Documenten en Beheer gaat de naam van de module zelf nog naar de start van die module. De chat (Element) heeft geen logo in de app; daar helpt het nieuwe tabblad.

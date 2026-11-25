@@ -1,5 +1,5 @@
 [Unit]
-Description=Digitaal GemeenGoed: elk kwartier de architectuurmodellen bijwerken
+Description=Gemeenschapsplatform: elk kwartier de architectuurmodellen bijwerken
 
 [Timer]
 OnBootSec=5min

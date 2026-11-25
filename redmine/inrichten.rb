@@ -1,4 +1,4 @@
-# Redmine inrichten voor Digitaal GemeenGoed. Opnieuw draaien kan zonder schade.
+# Redmine inrichten voor het gemeenschapsplatform. Opnieuw draaien kan zonder schade.
 #
 #   docker compose -f compose.yml exec redmine \
 #     bundle exec rails runner /usr/local/share/dg/inrichten.rb
@@ -17,10 +17,14 @@
 #   een goedgekeurd voorstel een project.
 
 domein = ENV.fetch('DOMEIN')
+# De organisatie (organisatie.yml, via de omgeving).
+org_naam = ENV['ORG_NAAM'].to_s.strip.empty? ? 'Gemeenschapsplatform' : ENV['ORG_NAAM'].strip
+org_kort = ENV['ORG_KORT'].to_s.strip.empty? ? org_naam : ENV['ORG_KORT'].strip
+org_kleur = ENV['ORG_KLEUR'].to_s =~ /\A#\h{6}\z/ ? ENV['ORG_KLEUR'] : '#14478f'
 
 # --- Instellingen ----------------------------------------------------------
 {
-  'app_title' => 'Projecten · Digitaal GemeenGoed',
+  'app_title' => "Projecten · #{org_naam}",
   'host_name' => "projecten.#{domein}",
   'protocol' => 'https',
   'default_language' => 'nl',
@@ -47,16 +51,18 @@ Setting.plugin_redmine_oauth = (Setting.plugin_redmine_oauth || {}).merge(
   'oauth_login' => '0',
   'oauth_only_login' => '0'
 )
-provider = OauthProvider.find_or_initialize_by(custom_name: 'Digitaal GemeenGoed')
+# Op client-id, niet op naam: een andere naam in organisatie.yml geeft dan geen tweede knop.
+provider = OauthProvider.find_by(client_id: 'redmine') || OauthProvider.new
 provider.assign_attributes(
+  custom_name: org_naam,
   oauth_name: 'Keycloak',
   site: "https://aanmelden.#{domein}",
   tenant_id: 'gemeenschap',
   client_id: 'redmine',
   client_secret: ENV.fetch('REDMINE_CLIENT_SECRET'),
   identify_user_by: 'email',
-  button_color: '#14478f',
-  button_text: 'Inloggen met je DGG-account', # maximaal 40 tekens
+  button_color: org_kleur,
+  button_text: "Inloggen met je #{org_kort}-account"[0, 40], # maximaal 40 tekens
   position: 1
 )
 provider.save!
@@ -232,7 +238,7 @@ pv.default_assigned_to = Group.find_by(lastname: 'Netwerk: Kerngroep')
 pv.save!
 
 # Het account "site": geen beheerder, alleen voorstellen indienen.
-site = User.find_by(login: 'site') || User.new(login: 'site', firstname: 'Website', lastname: 'Digitaal GemeenGoed',
+site = User.find_by(login: 'site') || User.new(login: 'site', firstname: 'Website', lastname: org_naam,
                                                 mail: "site@#{domein}", language: 'nl')
 site.admin = false
 site.status = User::STATUS_ACTIVE

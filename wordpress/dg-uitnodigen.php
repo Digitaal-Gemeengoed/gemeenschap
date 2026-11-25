@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — collega's uitnodigen
+ * Plugin Name: Gemeenschapsplatform — collega's uitnodigen
  * Description: Op de Leden-pagina nodigt een lid collega's uit om lid te worden. De site stuurt een eenmalige mail namens het lid, met een link naar het aanmeldformulier (Keycloak). Er wordt vooraf geen account aangemaakt.
  *
  * Grenzen: hooguit DG_UITNODIGEN_PER_DAG per lid per dag; hetzelfde adres niet
@@ -235,7 +235,7 @@ function dg_uit_mail( string $adres, string $sleutel, string $bericht, WP_User $
 	$naam = $door->display_name ?: $door->user_login;
 	$org  = (string) get_user_meta( $door->ID, 'dg_organisatie', true );
 	$wie  = $naam . ( $org ? " ($org)" : '' );
-	$site = 'Digitaal GemeenGoed';
+	$site = dg_org( 'naam' );
 
 	$tekst = "Hallo,\n\n$wie nodigt je uit om lid te worden van $site: een community van gemeenten en andere overheden die samen open source oplossingen ontwikkelen en kennis delen.\n\n";
 	if ( '' !== $bericht ) {
@@ -285,7 +285,7 @@ function dg_uit_niet_geldig(): void {
 	nocache_headers();
 	status_header( 410 );
 	header( 'Content-Type: text/html; charset=utf-8' );
-	echo '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Uitnodiging verlopen · Digitaal GemeenGoed</title>'
+	echo '<!doctype html><html lang="nl"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Uitnodiging verlopen · ' . esc_html( dg_org( 'naam' ) ) . '</title>'
 		. '<body style="font-family:system-ui,sans-serif;max-width:34rem;margin:4rem auto;padding:0 16px;color:#2b3a4e;line-height:1.5">'
 		. '<h1 style="color:#0a2654;font-size:1.4rem">Deze uitnodiging is niet (meer) geldig</h1>'
 		. '<p>Een uitnodiging is ' . (int) DG_UITNODIGING_DAGEN . ' dagen geldig. Vraag de collega die je uitnodigde om een nieuwe.</p></body></html>';

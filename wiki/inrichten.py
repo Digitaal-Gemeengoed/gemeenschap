@@ -1,4 +1,4 @@
-"""Wiki.js (de kennisbank) inrichten voor Digitaal GemeenGoed.
+"""Wiki.js (de kennisbank) inrichten voor het gemeenschapsplatform.
 
 Draait in een kleine Python-container naast de wiki (compose.yml, service
 wiki-inrichten, profiel gereedschap) bij elke bijwerken.sh. Opnieuw draaien kan
@@ -28,6 +28,12 @@ import urllib.error
 import urllib.request
 
 DOMEIN = os.environ["DOMEIN"]
+# De organisatie (organisatie.yml, via de omgeving).
+ORG_NAAM = os.environ.get("ORG_NAAM") or "Gemeenschapsplatform"
+ORG_ORGANISATIE = os.environ.get("ORG_ORGANISATIE") or ORG_NAAM
+KLEUR = os.environ.get("ORG_KLEUR") or "#14478f"
+KLEUR_DONKER = os.environ.get("ORG_KLEUR_DONKER") or "#0a2654"
+KLEUR_LINK = os.environ.get("ORG_KLEUR_LINK") or "#1a56a8"
 WIKI = os.environ.get("WIKI_INTERN", "http://wiki:3000").rstrip("/")
 BASIS = os.environ.get("WIKI_BASIS_URL") or f"https://kennis.{DOMEIN}"
 KC_PUBLIEK = os.environ.get("KC_BASIS_URL") or f"https://aanmelden.{DOMEIN}"
@@ -132,32 +138,32 @@ JWT = login["jwt"]
 
 # --- Site ----------------------------------------------------------------------
 r = gq(
-    """mutation($host: String!) { site { updateConfig(
-        host: $host, title: "Kennisbank · Digitaal GemeenGoed",
+    """mutation($host: String!, $title: String!, $company: String!) { site { updateConfig(
+        host: $host, title: $title,
         description: "Kennis van en voor gemeenten over open source en Common Ground",
-        company: "Stichting Digitaal GemeenGoed", contentLicense: "",
+        company: $company, contentLicense: "",
         robots: ["noindex", "nofollow"],
-        logoUrl: "/_assets/dgg/icoon.png",
+        logoUrl: "/huisstijl/icoon.png",
         authAutoLogin: true, authHideLocal: true,
         featurePageRatings: false, featurePageComments: true, featurePersonalWikis: false,
         securityTrustProxy: true, securityOpenRedirect: true, securityIframe: true,
         securityReferrerPolicy: true, securityHSTS: false, uploadScanSVG: true
     ) { responseResult { succeeded message } } } }""",
     JWT,
-    {"host": BASIS},
+    {"host": BASIS, "title": f"Kennisbank · {ORG_NAAM}", "company": ORG_ORGANISATIE},
 )["site"]["updateConfig"]
 resultaat(r, "site-instellingen")
 meld(f"Site: {BASIS}, alleen inloggen via Keycloak")
 
 # --- Uiterlijk: de kleuren van de site ----------------------------------------------
 # Met "body" ervoor: zwaarder dan de kleuren die Vuetify zelf in de pagina zet.
-CSS = """
-body .nav-header, body .nav-header .v-toolbar__content { background-color: #0a2654 !important; }
-body .v-application .primary { background-color: #14478f !important; border-color: #14478f !important; }
-body .v-application .primary--text { color: #14478f !important; caret-color: #14478f !important; }
-body .v-application .blue--text { color: #14478f !important; }
-body .v-application .contents a { color: #1a56a8; }
-body .nav-header-title .title { font-weight: 800 !important; letter-spacing: -.01em; }
+CSS = f"""
+body .nav-header, body .nav-header .v-toolbar__content {{ background-color: {KLEUR_DONKER} !important; }}
+body .v-application .primary {{ background-color: {KLEUR} !important; border-color: {KLEUR} !important; }}
+body .v-application .primary--text {{ color: {KLEUR} !important; caret-color: {KLEUR} !important; }}
+body .v-application .blue--text {{ color: {KLEUR} !important; }}
+body .v-application .contents a {{ color: {KLEUR_LINK}; }}
+body .nav-header-title .title {{ font-weight: 800 !important; letter-spacing: -.01em; }}
 """
 CSS += "body .nav-header .v-avatar { cursor: pointer; }\n"
 # Het logo linksboven gaat naar de hoofdpagina van de site (Wiki.js zelf stuurt
@@ -237,7 +243,7 @@ r = gq(
        { responseResult { succeeded message } } } }""",
     JWT,
     {"s": [
-        {"key": STRATEGIE, "strategyKey": "oidc", "displayName": "Digitaal GemeenGoed", "order": 0, "isEnabled": True,
+        {"key": STRATEGIE, "strategyKey": "oidc", "displayName": ORG_NAAM, "order": 0, "isEnabled": True,
          "config": [{"key": k, "value": waarde(v)} for k, v in keycloak.items()],
          "selfRegistration": True, "domainWhitelist": [], "autoEnrollGroups": [ids["/netwerk/gebruikers"]]},
         # Het noodaccount: alleen voor dit script en in nood (niet op het inlogscherm).
@@ -366,7 +372,7 @@ if REPO and os.path.isfile(SLEUTEL):
         "basicUsername": "",
         "basicPassword": "",
         "defaultEmail": f"kennisbank@{DOMEIN}",
-        "defaultName": "Kennisbank Digitaal GemeenGoed",
+        "defaultName": f"Kennisbank {ORG_NAAM}",
         "localRepoPath": "./data/repo",
         "alwaysNamespace": False,
         "gitBinaryPath": "",

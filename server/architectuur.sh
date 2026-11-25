@@ -23,6 +23,7 @@ SITE=/srv/dg-architectuur
 IMAGE="woozymasta/archimate-ci-image:$(sed -n 's/^ARCHI_CI_VERSIE=//p' .env | grep . || echo 5.7.0-1.0.6)"
 TOKEN="$(sed -n 's/^ARCH_GITHUB_TOKEN=//p' .env)"
 DOMEIN="$(sed -n 's/^DOMEIN=//p' .env)"
+ORG_NAAM="$(org_waarde ORG_NAAM)"
 OPNIEUW=0; if [ "${1:-}" = --opnieuw ]; then OPNIEUW=1; fi
 
 install -d -m 700 "$DG_STAAT" "$BRON"
@@ -116,16 +117,17 @@ done
 
 # --- De overzichtspagina ------------------------------------------------------
 {
-  cat <<'KOP'
+  sed "s|__ORG_NAAM__|$ORG_NAAM|g" <<'KOP'
 <!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Architectuurmodellen · Digitaal GemeenGoed</title>
+<title>Architectuurmodellen · __ORG_NAAM__</title>
 <style>
-  :root { --marine: #0a2654; --blauw: #14478f; --link: #1a56a8; --rand: #dbe4ee; --grijs: #4a5a6c; }
+  @import url("/huisstijl/kleuren.css");
+  :root { --marine: var(--dg-kleur-donker, #0a2654); --blauw: var(--dg-kleur, #14478f); --link: var(--dg-kleur-link, #1a56a8); --rand: #dbe4ee; --grijs: #4a5a6c; }
   * { box-sizing: border-box; }
   body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1c2733; background: #f5f8fb; }
   header { background: var(--marine); color: #fff; padding: 1.4rem 1rem; }
@@ -149,7 +151,7 @@ done
 </head>
 <body>
 KOP
-  printf '<header><div><a class="merk" href="https://%s/" title="Naar de hoofdpagina"><img src="https://%s/wp-content/themes/digitaalgemeengoed/assets/icoon.png" alt="" width="36" height="36">Digitaal GemeenGoed</a><h1>Architectuurmodellen</h1><p>De ArchiMate-modellen van de projecten van Digitaal GemeenGoed, alleen voor leden.</p></div></header>\n<main>\n' "$DOMEIN" "$DOMEIN"
+  printf '<header><div><a class="merk" href="https://%s/" title="Naar de hoofdpagina"><img src="/huisstijl/icoon.png" alt="" width="36" height="36">%s</a><h1>Architectuurmodellen</h1><p>De ArchiMate-modellen van de projecten van %s, alleen voor leden.</p></div></header>\n<main>\n' "$DOMEIN" "$ORG_NAAM" "$ORG_NAAM"
   if [ -s "$BRON/lijst" ]; then
     echo '<ul class="modellen">'
     while IFS='|' read -r naam titel url datum; do

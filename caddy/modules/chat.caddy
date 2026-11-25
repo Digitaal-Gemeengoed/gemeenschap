@@ -1,0 +1,30 @@
+# Module chat (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+# --- Chat (Matrix) ----------------------------------------------------------------
+# Wie wil inloggen, heeft altijd een account in Keycloak nodig (MAS stuurt
+# door naar aanmelden.).
+matrix.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	# Inloggen, uitloggen en tokens vernieuwen: naar MAS.
+	@mas path_regexp ^/_matrix/client/[^/]+/(login|logout|refresh)
+	reverse_proxy @mas mas:8080
+	# Alleen de API's voor apps en (als die aan staat) federatie; de beheer-API van Synapse niet.
+	@synapse path /_matrix/* /_synapse/client/*
+	reverse_proxy @synapse synapse:8008
+	respond 404
+}
+
+matrix-auth.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	reverse_proxy mas:8080
+}
+
+# Element Web: de chat in de browser.
+chat.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	reverse_proxy element:80
+}

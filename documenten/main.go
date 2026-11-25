@@ -106,6 +106,10 @@ func main() {
 		}
 		time.Sleep(2 * time.Second)
 	}
+	// De ruimte van de organisatie heet zoals in organisatie.yml (soort).
+	if _, err := db.ExecContext(ctx, `UPDATE ruimte SET naam = $1 WHERE sleutel = 'cooperatie' AND naam <> $1`, orgSoort(true)); err != nil {
+		log.Printf("naam van de ruimte van de organisatie: %v", err)
+	}
 	for i := 0; ; i++ {
 		err = opslag.Klaar(ctx)
 		if err == nil {

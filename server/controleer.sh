@@ -11,14 +11,16 @@ moet_root
 cd "$DG_MAP" || exit 1
 [ -s .env ] || { echo "  Nog niet geïnstalleerd."; exit 0; }
 
+meld "Organisatie en modules (organisatie.yml)"
+ORG="$(sed -n "s/^ORG_NAAM='\\(.*\\)'$/\\1/p" "$DG_ORG_ENV" 2>/dev/null || true)"
+if [ -n "$ORG" ]; then ok "$ORG"; else waarschuw "organisatie.yml is nog niet ingelezen: draai sudo $DG_MAP/server/bijwerken.sh"; fi
+ok "Modules: $(modules)"
+
 meld "Containers"
 dc ps --format '  {{.Service}}: {{.Status}}'
 
 meld "Adressen"
 DOMEIN="$(sed -n 's/^DOMEIN=//p' .env)"
-for naam in "kennis.$DOMEIN" "documenten.$DOMEIN" "architectuur.$DOMEIN" "beheer.$DOMEIN"; do
-  wijst_hier "$naam" || waarschuw "$naam wijst nog niet naar deze server (DNS); dat deel is nog niet bereikbaar"
-done
 for adres in $(controle_adressen "$DOMEIN"); do
   code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "https://$adres")"
   if [[ "$code" =~ ^[23] ]]; then ok "https://$adres ($code)"
@@ -32,7 +34,7 @@ done
 meld "DNS en https"
 IP4="$(publiek_ip)"
 IP6="$(ip -6 route get 2606:4700:4700::1111 2>/dev/null | awk '{for (i = 1; i < NF; i++) if ($i == "src") { print $(i + 1); exit }}')"
-for naam in "$DOMEIN" "www.$DOMEIN" "aanmelden.$DOMEIN" "projecten.$DOMEIN" "forum.$DOMEIN" "chat.$DOMEIN" "matrix.$DOMEIN"; do
+for naam in $(dns_namen "$DOMEIN"); do
   a="$(getent ahostsv4 "$naam" | awk '{print $1}' | sort -u | tr '\n' ' ')"
   aaaa="$(python3 -I -c 'import socket,sys
 try: print(" ".join(sorted({i[4][0] for i in socket.getaddrinfo(sys.argv[1], 443, socket.AF_INET6)})))
@@ -55,6 +57,7 @@ if systemctl is-active -q dg-uitrol.timer; then ok "Timer actief"; else waarschu
 meld "Stand van de server voor beheer"
 if systemctl is-active -q dg-status.timer; then ok "Timer actief"; else waarschuw "Timer staat uit: sudo systemctl enable --now dg-status.timer"; fi
 
+if module_aan architectuur; then
 meld "Architectuurmodellen"
 if systemctl is-active -q dg-architectuur.timer; then ok "Timer actief"; else waarschuw "Timer staat uit: sudo systemctl enable --now dg-architectuur.timer"; fi
 if [ -s /var/lib/dg-gemeenschap/architectuur/lijst ]; then
@@ -63,6 +66,7 @@ if [ -s /var/lib/dg-gemeenschap/architectuur/lijst ]; then
   done < /var/lib/dg-gemeenschap/architectuur/lijst
 else
   ok "Nog geen modellen in architectuur/repos.txt"
+fi
 fi
 "$DG_MAP/server/uitrol.sh" --status | sed 's/^/  /'
 

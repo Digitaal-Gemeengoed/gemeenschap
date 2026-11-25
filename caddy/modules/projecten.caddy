@@ -1,0 +1,9 @@
+# Module projecten (organisatie.yml). Alleen actief als de module aan staat:
+# server/bijwerken.sh zet dit bestand dan in /etc/caddy-actief/.
+
+projecten.{$DOMEIN} {
+	import beveiliging
+	import huisstijl
+	encode zstd gzip
+	reverse_proxy redmine:3000
+}

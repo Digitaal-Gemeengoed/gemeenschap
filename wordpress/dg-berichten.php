@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — nieuws en berichten
+ * Plugin Name: Gemeenschapsplatform — nieuws en berichten
  * Description: Berichten van leden en van de redactie, in de stijl van LinkedIn: een nieuwsfeed op /nieuws/, een eigen pagina per bericht, tags (ook voor projecten, werkgroepen en de coöperatie) met een feed per tag, reacties (leuk, gefeliciteerd, inspirerend, nuttig), opmerkingen, delen, verzenden, reposten, foto's, video's en linkvoorbeelden, en nieuwsflitsen op de homepage.
  *
  * Zichtbaarheid: per bericht "openbaar" (iedereen, ook om te delen op LinkedIn)
@@ -29,6 +29,11 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+// Alleen als de module berichten aan staat (organisatie.yml, dg-platform.php).
+if ( function_exists( 'dg_module' ) && ! dg_module( 'berichten' ) ) {
+	return;
+}
 
 const DG_BER_TYPE        = 'dg_bericht';
 const DG_BER_TAG         = 'dg_tag';
@@ -274,7 +279,7 @@ add_action( 'dg_ber_vaste_tags', 'dg_ber_vaste_tags' );
 
 /** De vaste tags: coöperatie, werkgroepen (BuddyPress) en openbare projecten (Redmine). */
 function dg_ber_vaste_tags(): void {
-	$vast = array( 'cooperatie' => array( 'Coöperatie', 'cooperatie', '' ) );
+	$vast = array( 'cooperatie' => array( dg_soort( true ), 'cooperatie', '' ) );
 	if ( function_exists( 'groups_get_groups' ) ) {
 		$groepen = groups_get_groups( array( 'per_page' => 500, 'show_hidden' => false ) );
 		foreach ( $groepen['groups'] as $g ) {
@@ -411,7 +416,7 @@ function dg_ber_soortnaam( WP_Term $t ): string {
 	return array(
 		'werkgroep'  => 'Werkgroep',
 		'project'    => 'Project',
-		'cooperatie' => 'De coöperatie',
+		'cooperatie' => 'De ' . dg_soort(),
 	)[ (string) get_term_meta( $t->term_id, 'dg_soort', true ) ] ?? 'Tag';
 }
 
@@ -568,12 +573,12 @@ function dg_ber_voorbeeld( string $url, int $post_id ): array {
 				'url'   => $url,
 				'titel' => get_the_title( $p ),
 				'tekst' => wp_trim_words( wp_strip_all_tags( $p->post_excerpt ?: strip_shortcodes( $p->post_content ) ), 28 ),
-				'site'  => 'Digitaal GemeenGoed',
+				'site'  => dg_org( 'naam' ),
 				'beeld' => (int) get_post_thumbnail_id( $p ),
 				'eigen' => 1,
 			);
 		}
-		return array( 'url' => $url, 'titel' => $url, 'site' => 'Digitaal GemeenGoed' );
+		return array( 'url' => $url, 'titel' => $url, 'site' => dg_org( 'naam' ) );
 	}
 	// Een speler (YouTube, Vimeo, …) via oEmbed.
 	$oe   = _wp_oembed_get_object();
@@ -856,8 +861,8 @@ add_action(
 		if ( $schrijver && is_email( $schrijver->user_email ) ) {
 			wp_mail(
 				$schrijver->user_email,
-				'Je bericht op Digitaal GemeenGoed is verborgen',
-				"Hallo {$schrijver->display_name},\n\nDe kerngroep heeft je bericht \"" . ( $p->post_title ?: wp_trim_words( $p->post_content, 10 ) ) . "\" verborgen, omdat het niet past bij de afspraken van de community (bijvoorbeeld persoonsgegevens of vertrouwelijke informatie). Vragen? Antwoord op deze mail of stuur de kerngroep een bericht.\n\nDigitaal GemeenGoed\n"
+				'Je bericht op ' . dg_org( 'naam' ) . ' is verborgen',
+				"Hallo {$schrijver->display_name},\n\nDe kerngroep heeft je bericht \"" . ( $p->post_title ?: wp_trim_words( $p->post_content, 10 ) ) . "\" verborgen, omdat het niet past bij de afspraken van de community (bijvoorbeeld persoonsgegevens of vertrouwelijke informatie). Vragen? Antwoord op deze mail of stuur de kerngroep een bericht.\n\n" . dg_org( 'naam' ) . "\n"
 			);
 		}
 		dg_ber_melding_zet( array( 'Het bericht is verborgen. De schrijver krijgt een mail. Terugzetten kan in het beheer (Nieuws).' ) );
@@ -1035,7 +1040,7 @@ function dg_ber_rest_melden( WP_REST_Request $v ) {
 	$wie = wp_get_current_user();
 	wp_mail(
 		$aan,
-		'Melding over een bericht op Digitaal GemeenGoed',
+		'Melding over een bericht op ' . dg_org( 'naam' ),
 		"{$wie->display_name} meldt dit bericht:\n\n" . get_permalink( $p ) . "\n\nReden: " . ( $reden ?: '(geen reden gegeven)' ) . "\n\nVerbergen kan via het menu ⋯ bij het bericht.\n"
 	);
 	return array( 'tekst' => 'Bedankt. De kerngroep kijkt ernaar.' );
@@ -1596,7 +1601,7 @@ add_action(
 		$auteur = get_userdata( (int) $p->post_author );
 		$meta  = array(
 			'og:type'        => 'article',
-			'og:site_name'   => 'Digitaal GemeenGoed',
+			'og:site_name'   => dg_org( 'naam' ),
 			'og:title'       => $titel,
 			'og:description' => $tekst,
 			'og:url'         => get_permalink( $p ),

@@ -1,6 +1,21 @@
-# VPS 4 — gemeenschap. Caddy haalt zelf certificaten op voor alle namen.
+# Het gemeenschapsplatform. Caddy haalt zelf certificaten op voor alle namen.
 # Nodig in DNS: A-records (of CNAME's) naar deze server voor <domein>,
-# www.<domein>, aanmelden.<domein>, projecten.<domein> en forum.<domein>.
+# www.<domein>, aanmelden.<domein>, en de subdomeinen van de modules die aan
+# staan (server/controleer.sh noemt ze).
+
+# Logo en icoon van de organisatie (huisstijl/ in de repo) op elk adres onder
+# /huisstijl/, zodat elke module ze met een vast pad kan tonen.
+# kleuren.css: de kleuren uit organisatie.yml als CSS-variabelen
+# (--dg-kleur, --dg-kleur-donker, --dg-kleur-link).
+(huisstijl) {
+	handle_path /huisstijl/* {
+		@kleuren path /kleuren.css
+		header @kleuren Content-Type "text/css; charset=utf-8"
+		respond @kleuren ":root{--dg-kleur:{$ORG_KLEUR:#14478f};--dg-kleur-donker:{$ORG_KLEUR_DONKER:#0a2654};--dg-kleur-link:{$ORG_KLEUR_LINK:#1a56a8}}" 200
+		root * /srv/huisstijl
+		file_server
+	}
+}
 
 (beveiliging) {
 	header {
@@ -14,6 +29,7 @@
 
 {$DOMEIN} {
 	import beveiliging
+	import huisstijl
 	encode zstd gzip
 	# XML-RPC is een bekend doelwit en hier niet nodig.
 	@xmlrpc path /xmlrpc.php
@@ -25,49 +41,18 @@
 	# Docker-netwerk. Het geheim is de echte slot; dit is de tweede.
 	@intern expression `{path}.matches("(?i)^/+wp-json/+dg/") || {query.rest_route}.matches("(?i)^/*dg/")`
 	respond @intern 404
-	# Chat (Matrix): waar de server staat. Gebruikersnamen zijn @naam:{$DOMEIN}.
-	header /.well-known/matrix/* Access-Control-Allow-Origin "*"
-	header /.well-known/matrix/* Content-Type application/json
-	respond /.well-known/matrix/client `{"m.homeserver":{"base_url":"https://matrix.{$DOMEIN}"}}` 200
-	respond /.well-known/matrix/server `{"m.server":"matrix.{$DOMEIN}:443"}` 200
+	# Wat modules op het hoofddomein nodig hebben (caddy/modules/*.hoofd.caddy).
+	import /etc/caddy-actief/hoofd/*.caddy
 	reverse_proxy wordpress:80
-}
-
-# --- Chat (Matrix) ----------------------------------------------------------------
-# Wie wil inloggen, heeft altijd een account in Keycloak nodig (MAS stuurt
-# door naar aanmelden.).
-matrix.{$DOMEIN} {
-	import beveiliging
-	# Inloggen, uitloggen en tokens vernieuwen: naar MAS.
-	@mas path_regexp ^/_matrix/client/[^/]+/(login|logout|refresh)
-	reverse_proxy @mas mas:8080
-	# Alleen de API's voor apps en (als die aan staat) federatie; de beheer-API van Synapse niet.
-	@synapse path /_matrix/* /_synapse/client/*
-	reverse_proxy @synapse synapse:8008
-	respond 404
-}
-
-matrix-auth.{$DOMEIN} {
-	import beveiliging
-	reverse_proxy mas:8080
-}
-
-# Element Web: de chat in de browser.
-chat.{$DOMEIN} {
-	import beveiliging
-	reverse_proxy element:80
 }
 
 www.{$DOMEIN} {
 	redir https://{$DOMEIN}{uri} permanent
 }
 
-forum.{$DOMEIN} {
-	redir https://{$DOMEIN}/forum{uri} permanent
-}
-
 aanmelden.{$DOMEIN} {
 	import beveiliging
+	import huisstijl
 	# Het beheerscherm van Keycloak niet naar buiten; via de SSH-tunnel (README.md, Beheer op de server).
 	@beheer path /admin*
 	respond @beheer "Niet beschikbaar" 404
@@ -76,55 +61,7 @@ aanmelden.{$DOMEIN} {
 	reverse_proxy keycloak:8080
 }
 
-projecten.{$DOMEIN} {
-	import beveiliging
-	encode zstd gzip
-	reverse_proxy redmine:3000
-}
-
-# De kennisbank (Wiki.js). Alleen voor leden: dat regelt de wiki zelf (gasten
-# mogen niets en worden naar het inloggen via Keycloak gestuurd).
-kennis.{$DOMEIN} {
-	import beveiliging
-	encode zstd gzip
-	reverse_proxy wiki:3000
-}
-
-# Documenten (dg-documenten): bestanden van de coöperatie en per project.
-# Alleen voor leden: dat regelt de dienst zelf (inloggen via Keycloak).
-documenten.{$DOMEIN} {
-	import beveiliging
-	# Alleen voor WordPress op het interne netwerk (documenten/intern.go).
-	@intern path /intern/*
-	respond @intern 404
-	reverse_proxy documenten:8080
-}
-
-# Beheer (dg-beheer): voor de beheerders van het platform en de kerngroep.
-# De dienst controleert zelf wie er binnenkomt (Keycloak).
-beheer.{$DOMEIN} {
-	import beveiliging
-	reverse_proxy beheer:8080
-}
-
-# De architectuurmodellen: de HTML-rapporten van Archi (server/architectuur.sh
-# bouwt ze in /srv/dg-architectuur). Alleen voor leden: oauth2-proxy vraagt
-# Keycloak wie er is; wie niet is ingelogd, gaat eerst naar het inloggen.
-architectuur.{$DOMEIN} {
-	import beveiliging
-	encode zstd gzip
-	handle /oauth2/* {
-		reverse_proxy oauth2-proxy:4180
-	}
-	handle {
-		forward_auth oauth2-proxy:4180 {
-			uri /oauth2/auth
-			@niet_ingelogd status 401
-			handle_response @niet_ingelogd {
-				redir * /oauth2/start?rd={scheme}://{hostport}{uri} 302
-			}
-		}
-		root * /srv/architectuur
-		file_server
-	}
-}
+# --- Modules --------------------------------------------------------------------
+# De subdomeinen van de modules die aan staan (caddy/modules/, gekopieerd door
+# server/bijwerken.sh naar /etc/caddy-actief/).
+import /etc/caddy-actief/*.caddy

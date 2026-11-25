@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — gemeenschap
+ * Plugin Name: Gemeenschapsplatform — gemeenschap
  * Description: Neemt bij elke login de gegevens uit Keycloak (realm "gemeenschap") over in WordPress, BuddyPress, bbPress en CiviCRM. Keycloak is de bron; hier wordt niets terug geschreven.
  * Version: 0.1.0
- * Author: Digitaal GemeenGoed
+ * Author: Gemeenschapsplatform (EUPL)
  * License: EUPL-1.2
  *
  * Een must-use plugin: staat in wp-content/mu-plugins en kan niet worden
@@ -275,7 +275,7 @@ function dg_profielvelden(): array {
 		$groep = (int) xprofile_insert_field_group(
 			array(
 				'name'        => DG_PROFIELGROEP,
-				'description' => 'Uit je account bij Digitaal GemeenGoed. Wijzigen doe je daar (Mijn account).',
+				'description' => 'Uit je account bij ' . dg_org( 'naam' ) . '. Wijzigen doe je daar (Mijn account).',
 				'can_delete'  => false,
 			)
 		);
@@ -390,18 +390,20 @@ add_action(
 			return;
 		}
 		if ( function_exists( 'bp_is_my_profile' ) && bp_is_my_profile() ) {
-			bp_core_new_nav_item(
-				array(
-					'name'                    => 'Mijn documenten',
-					'slug'                    => 'documenten',
-					'position'                => 85,
-					'show_for_displayed_user' => false,
-					'screen_function'         => static function () {
-						wp_redirect( dg_documenten_url( 'r/mijn' ) );
-						exit;
-					},
-				)
-			);
+			if ( dg_module( 'bestanden' ) ) {
+				bp_core_new_nav_item(
+					array(
+						'name'                    => 'Mijn documenten',
+						'slug'                    => 'documenten',
+						'position'                => 85,
+						'show_for_displayed_user' => false,
+						'screen_function'         => static function () {
+							wp_redirect( dg_documenten_url( 'r/mijn' ) );
+							exit;
+						},
+					)
+				);
+			}
 			// Taken: wat in Redmine aan jou of aan een van je groepen is
 			// toegewezen (zoals een projectvoorstel voor de kerngroep).
 			if ( function_exists( 'dg_pv_taken_url' ) ) {
@@ -422,7 +424,7 @@ add_action(
 			// platform en de kerngroep. Alleen een link; de beheerdienst
 			// controleert zelf in Keycloak wie er binnenkomt.
 			$groepen = (array) get_user_meta( get_current_user_id(), 'dg_groepen', true );
-			if ( array_intersect( $groepen, array( '/site/beheer', '/netwerk/kerngroep' ) ) ) {
+			if ( dg_module( 'beheer' ) && array_intersect( $groepen, array( '/site/beheer', '/netwerk/kerngroep' ) ) ) {
 				bp_core_new_nav_item(
 					array(
 						'name'                    => 'Beheer',
@@ -475,7 +477,7 @@ add_action(
 					'groups'
 				);
 			}
-			if ( $groep && ( groups_is_user_member( get_current_user_id(), $groep->id ) || current_user_can( 'manage_options' ) ) ) {
+			if ( $groep && dg_module( 'bestanden' ) && ( groups_is_user_member( get_current_user_id(), $groep->id ) || current_user_can( 'manage_options' ) ) ) {
 				bp_core_new_subnav_item(
 					array(
 						'name'            => 'Documenten',
@@ -491,6 +493,8 @@ add_action(
 					),
 					'groups'
 				);
+			}
+			if ( $groep && dg_module( 'chat' ) && ( groups_is_user_member( get_current_user_id(), $groep->id ) || current_user_can( 'manage_options' ) ) ) {
 				// De chatkamer van de werkgroep (Documenten houdt de leden bij).
 				bp_core_new_subnav_item(
 					array(
@@ -515,6 +519,9 @@ add_action(
 
 /** De chat (Element Web op chat.<domein>), eventueel meteen in een kamer (#alias). */
 function dg_chat_url( string $alias = '' ): string {
+	if ( ! dg_module( 'chat' ) ) {
+		return '';
+	}
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 	$url  = 'https://chat.' . $host . '/';
 	return '' === $alias ? $url : $url . '#/room/' . rawurlencode( '#' . $alias . ':' . $host );
@@ -561,7 +568,7 @@ function dg_civicrm( int $uid, array $groepen, array $org, string $toestemming, 
 			\Civi\Api4\Activity::create( false )
 				->addValue( 'activity_type_id:name', dg_civicrm_activiteitsoort() )
 				->addValue( 'subject', 'ja' === $toestemming ? 'Toestemming nieuwsbrief: ja' : 'Toestemming nieuwsbrief: nee' )
-				->addValue( 'details', 'Gegeven of gewijzigd in het account bij Digitaal GemeenGoed (Keycloak).' )
+				->addValue( 'details', 'Gegeven of gewijzigd in het account bij ' . dg_org( 'naam' ) . ' (Keycloak).' )
 				->addValue( 'source_contact_id', $contact )
 				->addValue( 'target_contact_id', array( $contact ) )
 				->addValue( 'status_id:name', 'Completed' )
@@ -766,7 +773,7 @@ add_action(
 		$mailer->Password   = (string) getenv( 'SMTP_WACHTWOORD' );
 		$afzender           = getenv( 'SMTP_AFZENDER' );
 		if ( $afzender ) {
-			$mailer->setFrom( $afzender, 'Digitaal GemeenGoed', false );
+			$mailer->setFrom( $afzender, dg_org( 'naam' ), false );
 		}
 	}
 );
@@ -800,7 +807,7 @@ function dg_pb_mail( $bericht ): void {
 	}
 	$afzender = (int) $bericht->sender_id;
 	$van      = $afzender ? bp_core_get_user_displayname( $afzender ) : '';
-	$van      = '' !== $van ? $van : 'Digitaal GemeenGoed';
+	$van      = '' !== $van ? $van : dg_org( 'naam' );
 	$draad    = (int) $bericht->thread_id;
 	$onderwerp = trim( wp_specialchars_decode( wp_strip_all_tags( (string) $bericht->subject ), ENT_QUOTES ) );
 	$tekst    = trim( preg_replace( '/[ \t]+/', ' ', wp_specialchars_decode( wp_strip_all_tags( str_ireplace( array( '<br>', '<br />', '</p>' ), "\n", (string) $bericht->message ) ), ENT_QUOTES ) ) );
@@ -828,11 +835,12 @@ function dg_pb_mail( $bericht ): void {
 			? bp_members_get_user_url( $uid, bp_members_get_path_chunks( array( bp_get_settings_slug(), 'notifications' ) ) )
 			: trailingslashit( bp_core_get_user_domain( $uid ) ) . bp_get_settings_slug() . '/notifications/';
 		$mail = "Hallo {$lid->display_name},\n\n"
-			. "{$van} heeft je een bericht gestuurd op Digitaal GemeenGoed"
+			. "{$van} heeft je een bericht gestuurd op " . dg_org( 'naam' )
 			. ( '' !== $onderwerp ? ": \"{$onderwerp}\"" : '' ) . ".\n\n"
 			. ( '' !== $uittreksel ? $uittreksel . "\n\n" : '' )
 			. "Lezen en antwoorden (een antwoord op deze mail komt niet aan):\n{$link}\n\n"
-			. "--\nJe krijgt deze mail omdat iemand je een persoonlijk bericht stuurde. Liever geen mail? Zet het uit:\n{$uit}\n";
+			. "--\nJe krijgt deze mail omdat iemand je een persoonlijk bericht stuurde."
+			. ( bp_is_active( 'settings' ) ? " Liever geen mail? Zet het uit:\n{$uit}\n" : "\n" );
 		if ( wp_mail( $lid->user_email, "Nieuw bericht van {$van}", $mail ) ) {
 			$gemaild[ $draad ] = $nu;
 			// Alleen de recente gesprekken bewaren.
@@ -1236,10 +1244,10 @@ function dg_civicrm_beheerder(): bool {
 function dg_beheer_menu(): array {
 	$punten  = array();
 	$groepen = (array) get_user_meta( get_current_user_id(), 'dg_groepen', true );
-	if ( is_user_logged_in() && array_intersect( $groepen, array( '/site/beheer', '/netwerk/kerngroep' ) ) ) {
+	if ( dg_module( 'beheer' ) && is_user_logged_in() && array_intersect( $groepen, array( '/site/beheer', '/netwerk/kerngroep' ) ) ) {
 		$punten[] = array( 'schild', 'Beheer', 'beheer', 'https://beheer.' . wp_parse_url( home_url(), PHP_URL_HOST ) . '/' );
 	}
-	if ( dg_civicrm_beheerder() ) {
+	if ( dg_module( 'ledenbeheer' ) && dg_civicrm_beheerder() ) {
 		$punten[] = array( 'werkplek', 'Ledenadministratie', 'ledenadministratie', admin_url( 'admin.php?page=CiviCRM&q=civicrm/contact/search&reset=1' ) );
 	}
 	if ( function_exists( 'dg_cf_beheerder' ) && dg_cf_beheerder() ) {

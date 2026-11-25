@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — dashboard voor leden
+ * Plugin Name: Gemeenschapsplatform — dashboard voor leden
  * Description: Wat een ingelogd lid op de startpagina ziet: profiel en navigatie, projectupdates uit Redmine, recente discussies uit de fora, samenwerkingen, actieve leden en evenementen uit CiviCRM. Shortcode [dg_dashboard].
  *
  * Op de startpagina (inhoud/paginas/home.md) staat [dg_dashboard] onder de
@@ -44,6 +44,9 @@ add_shortcode(
 
 /** Het adres van Documenten (documenten.<domein>), met een pad erachter. */
 function dg_documenten_url( string $pad = '' ): string {
+	if ( ! dg_module( 'bestanden' ) ) {
+		return '';
+	}
 	return 'https://documenten.' . wp_parse_url( home_url(), PHP_URL_HOST ) . '/' . ltrim( $pad, '/' );
 }
 
@@ -83,30 +86,34 @@ function dg_dashboard(): string {
 			<section class="dg-db-welkom">
 				<span class="dg-icoon dg-icoon-mensen" aria-hidden="true"></span>
 				<div>
-					<h2>Welkom in de DGG-community!</h2>
-					<p>Dé plek voor gemeentelijke professionals, developers, beheerders en beleidsmakers die samen werken aan open, betrouwbare en herbruikbare overheidssoftware.</p>
+					<h2><?php echo esc_html( 'Welkom in de ' . dg_org( 'kort' ) . '-community!' ); ?></h2>
+					<p><?php echo esc_html( dg_org( 'welkom' ) ); ?></p>
 				</div>
 			</section>
 			<?php echo function_exists( 'dg_ber_flitsen_html' ) ? dg_ber_flitsen_html( 3, 'dashboard' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<div class="dg-db-raster">
-				<?php echo dg_db_projectupdates(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-				<?php echo dg_db_discussies(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php echo dg_module( 'projecten' ) ? dg_db_projectupdates() : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php echo dg_module( 'community' ) ? dg_db_discussies() : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php if ( dg_module( 'kennis' ) ) : ?>
 				<section class="dg-db-blok dg-db-oproep dg-db-kennis">
 					<h3><span class="dg-icoon dg-icoon-boek" aria-hidden="true"></span>Kennis- &amp; ervaringsbank</h3>
 					<p>Handleidingen, how-to's, referentiearchitecturen, lessen uit de praktijk en herbruikbare componenten.</p>
 					<a class="dg-db-knop dg-db-knop-rand" href="<?php echo esc_url( dg_db_kennisbank() ); ?>">Naar de kennisbank ›</a>
 				</section>
+				<?php endif; ?>
+				<?php if ( dg_module( 'community' ) ) : ?>
 				<section class="dg-db-blok dg-db-oproep dg-db-doemee">
 					<h3><span class="dg-icoon dg-icoon-hand" aria-hidden="true"></span>Doe mee!</h3>
 					<p>Deel je kennis, stel vragen en werk mee aan open source oplossingen voor alle gemeenten.</p>
 					<a class="dg-db-knop" href="<?php echo esc_url( dg_db_forum_url() ); ?>">Start een discussie ›</a>
 				</section>
+				<?php endif; ?>
 			</div>
 		</div>
 		<aside class="dg-db-rechts">
 			<?php echo dg_db_samenwerkingen(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<?php echo dg_db_leden(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-			<?php echo dg_db_evenementen(); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php echo dg_module( 'agenda' ) ? dg_db_evenementen() : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</aside>
 	</div>
 	<?php
@@ -150,30 +157,34 @@ function dg_db_profiel( WP_User $gebruiker ): string {
 }
 
 function dg_db_forum_url(): string {
+	if ( ! dg_module( 'community' ) ) {
+		return '';
+	}
 	return function_exists( 'bbp_get_forums_url' ) ? bbp_get_forums_url() : home_url( '/forum/' );
 }
 
 function dg_db_navigatie( WP_User $gebruiker ): string {
-	$berichten = home_url( '/' );
+	$berichten = dg_module( 'berichten' ) ? home_url( '/' ) : '';
 	$ongelezen = 0;
-	if ( function_exists( 'bp_is_active' ) && bp_is_active( 'messages' ) ) {
+	if ( dg_module( 'berichten' ) && function_exists( 'bp_is_active' ) && bp_is_active( 'messages' ) ) {
 		$berichten = function_exists( 'bp_members_get_user_url' ) ? bp_members_get_user_url( $gebruiker->ID, bp_members_get_path_chunks( array( bp_get_messages_slug() ) ) ) : $berichten;
 		$ongelezen = (int) messages_get_unread_count( $gebruiker->ID );
 	}
 	$keycloak = function_exists( 'dg_keycloak' ) && dg_keycloak() ? dg_keycloak() . '/realms/gemeenschap/account/' : admin_url( 'profile.php' );
+	$keycloak = dg_module( 'instellingen' ) ? $keycloak : '';
 	$punten   = array(
 		array( 'huis', 'Dashboard', home_url( '/' ), 0 ),
-		array( 'nieuws', 'Nieuws', home_url( '/nieuws/' ), 0 ),
+		array( 'nieuws', 'Nieuws', dg_module( 'berichten' ) ? home_url( '/nieuws/' ) : '', 0 ),
 		array( 'mensen', 'Community', function_exists( 'bp_get_members_directory_permalink' ) ? bp_get_members_directory_permalink() : home_url( '/leden/' ), 0 ),
 		array( 'forum', 'Discussies & fora', dg_db_forum_url(), 0 ),
 		array( 'boek', 'Kennis- & ervaringsbank', dg_db_kennisbank(), 0 ),
 		array( 'document', 'Documenten', dg_documenten_url(), 0 ),
-		array( 'taken', 'Taken', function_exists( 'dg_pv_taken_url' ) ? dg_pv_taken_url() : home_url( '/' ), 0 ),
-		array( 'lagen', 'Projecten', home_url( '/projecten/' ), 0 ),
+		array( 'taken', 'Taken', function_exists( 'dg_pv_taken_url' ) ? dg_pv_taken_url() : '', 0 ),
+		array( 'lagen', 'Projecten', dg_module( 'projecten' ) ? home_url( '/projecten/' ) : '', 0 ),
 		array( 'hand', 'Samenwerkingen', dg_db_samenwerkingen_url(), 0 ),
 		array( 'kalender', 'Agenda', dg_db_evenementen_url(), 0 ),
 		array( 'mail', 'Berichten', $berichten, $ongelezen ),
-		array( 'chat', 'Chat', function_exists( 'dg_chat_url' ) ? dg_chat_url() : home_url( '/' ), 0 ),
+		array( 'chat', 'Chat', function_exists( 'dg_chat_url' ) ? dg_chat_url() : '', 0 ),
 		array( 'instellingen', 'Instellingen', $keycloak, 0 ),
 	);
 	// Beheer, Ledenadministratie en Toezeggingen: alleen voor wie ze mag gebruiken.
@@ -198,6 +209,9 @@ function dg_db_navigatie( WP_User $gebruiker ): string {
 
 /** Een GET op de API van Redmine, via het interne adres; null als het niet lukt. */
 function dg_db_redmine( string $pad ): ?array {
+	if ( ! dg_module( 'projecten' ) ) {
+		return null;
+	}
 	$basis = rtrim( (string) ( getenv( 'DG_REDMINE_INTERN' ) ?: '' ), '/' );
 	if ( ! $basis ) {
 		return null;
@@ -358,6 +372,9 @@ function dg_db_leden(): string {
 }
 
 function dg_db_evenementen_url(): string {
+	if ( ! dg_module( 'agenda' ) ) {
+		return '';
+	}
 	return home_url( '/agenda/' );
 }
 
@@ -365,7 +382,7 @@ function dg_db_evenementen_url(): string {
 function dg_db_evenementen(): string {
 	$items = function_exists( 'dg_ag_volgende' ) ? dg_ag_volgende( 3 ) : array();
 	if ( ! $items ) {
-		$inhoud = '<p class="dg-db-leeg">Nog niets gepland. <a href="' . esc_url( home_url( '/agenda/nieuw/' ) ) . '">Zet een evenement in de agenda</a>: van de coöperatie, je werkgroep of project, of een tip voor iets elders.</p>';
+		$inhoud = '<p class="dg-db-leeg">Nog niets gepland. <a href="' . esc_url( home_url( '/agenda/nieuw/' ) ) . '">Zet een evenement in de agenda</a>: van de ' . dg_soort() . ', je werkgroep of project, of een tip voor iets elders.</p>';
 	} else {
 		$inhoud = '<ul class="dg-db-lijst">';
 		foreach ( $items as $i ) {
@@ -383,5 +400,8 @@ function dg_db_evenementen(): string {
 
 /** De kennisbank (Wiki.js) op kennis.<domein>. */
 function dg_db_kennisbank(): string {
+	if ( ! dg_module( 'kennis' ) ) {
+		return '';
+	}
 	return 'https://kennis.' . wp_parse_url( home_url(), PHP_URL_HOST ) . '/';
 }

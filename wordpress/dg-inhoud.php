@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Digitaal GemeenGoed — pagina's uit GitHub
+ * Plugin Name: Gemeenschapsplatform — pagina's uit GitHub
  * Description: De pagina's in inhoud/paginas/ van de repo Digitaal-Gemeengoed/gemeenschap worden WordPress-pagina's. Die pagina's wijzig je via GitHub; in WordPress staan ze op slot.
  *
  * Een pagina is een Markdown-bestand met bovenaan een kopje tussen twee
@@ -236,8 +236,8 @@ function dg_inhoud_vak( string $soort, string $md, callable $link, callable $bee
 			}
 			$icoon   = ! empty( $kenmerk['icoon'] ) ? dg_inhoud_icoon( $kenmerk['icoon'][0] ) : '';
 			$binnen .= dg_blok( 'heading', '<h3 class="wp-block-heading">' . $icoon . dg_inhoud_regel( trim( $kop ), $link ) . '</h3>', array( 'level' => 3 ) ) . "\n\n" . dg_inhoud_blokken( $rest, $link, $beeld );
-			if ( ! empty( $kenmerk['campagne'] ) && ! empty( $kenmerk['doel'] ) ) {
-				// Een campagne met toezeggingen op de site (dg-crowdfunding.php).
+			if ( ! empty( $kenmerk['campagne'] ) && ! empty( $kenmerk['doel'] ) && dg_module( 'projecten' ) ) {
+				// Een campagne met toezeggingen op de site (dg-crowdfunding.php, module projecten).
 				$code    = '[dg_campagne id=' . sanitize_key( $kenmerk['campagne'][0] ) . ' doel=' . (int) preg_replace( '/\D/', '', $kenmerk['doel'][0] ) . ( ! empty( $kenmerk['einddatum'] ) ? ' einddatum=' . preg_replace( '/[^0-9-]/', '', $kenmerk['einddatum'][0] ) : '' ) . ']';
 				$binnen .= "\n\n" . dg_blok( 'shortcode', $code );
 			} elseif ( ! empty( $kenmerk['doel'] ) ) {
