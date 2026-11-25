@@ -9,7 +9,7 @@ De Office Assistent helpt een medewerker een stuk goed vast te leggen, op het mo
 Fase: [dg_fase project=office-assistent]
 Werkwijze: Open source, onder de EUPL
 Financiering: Te bepalen
-Volgen: [Redmine](https://projecten.digitaalgemeengoed.nl/projects/office-assistent)
+Volgen: [Redmine](https://projecten.digitaalgemeengoed.nl/projects/office-assistent) (voor leden)
 Documenten: [dg_documenten project=office-assistent]
 :::
 

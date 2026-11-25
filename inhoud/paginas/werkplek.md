@@ -12,7 +12,7 @@ volgorde: 4
 Fase: [dg_fase project=werkplek]
 Werkwijze: Open source, onder de EUPL
 Financiering: Te bepalen
-Volgen: [Redmine](https://projecten.digitaalgemeengoed.nl/projects/werkplek)
+Volgen: [Redmine](https://projecten.digitaalgemeengoed.nl/projects/werkplek) (voor leden)
 Documenten: [dg_documenten project=werkplek]
 :::
 

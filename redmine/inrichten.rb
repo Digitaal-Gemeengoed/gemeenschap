@@ -30,7 +30,9 @@ org_kleur = ENV['ORG_KLEUR'].to_s =~ /\A#\h{6}\z/ ? ENV['ORG_KLEUR'] : '#14478f'
   'default_language' => 'nl',
   'force_default_language_for_anonymous' => '1',
   'rest_api_enabled' => '1',
-  'login_required' => '0',
+  # Alleen voor leden: wat een project is en doet, staat openbaar op de projectpagina
+  # van de site; meldingen, planning, fora en bestanden zijn voor ingelogde leden.
+  'login_required' => '1',
   'self_registration' => '0',
   'lost_password' => '0',
   'mail_from' => ENV['SMTP_AFZENDER'].presence || "noreply@#{domein}",
@@ -114,7 +116,12 @@ rollen.each do |naam, rechten|
   r.assignable = !%w[Gebruiker Site].include?(naam)
   r.save!
 end
-puts "Rollen: #{rollen.keys.join(', ')}"
+# De ingebouwde rollen. Anoniem: niets (ook als login_required ooit uit zou gaan).
+# Niet-lid (ingelogd, maar nog in geen groep van het netwerk; en het account
+# "site"): alleen het nieuws van de projecten, voor de projectupdates op de site.
+Role.anonymous.tap { |r| r.permissions = []; r.save! }
+Role.non_member.tap { |r| r.permissions = %i[view_news]; r.save! }
+puts "Rollen: #{rollen.keys.join(', ')}; anoniem geen rechten, niet-lid alleen nieuws"
 
 # --- Groepen en het eerste project ------------------------------------------
 groepen = { 'Netwerk: Gebruikers' => 'Gebruiker', 'Netwerk: Contributors' => 'Contributor',

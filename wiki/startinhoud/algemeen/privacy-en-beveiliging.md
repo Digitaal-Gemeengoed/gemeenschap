@@ -16,7 +16,7 @@ Digitaal GemeenGoed en NL-Dit zijn samen verantwoordelijk voor de persoonsgegeve
 | organisatie, functie, werkveld | Keycloak, overgenomen in het ledenprofiel | ingelogde leden |
 | toestemming voor de nieuwsbrief | Keycloak en CiviCRM, met datum | de beheerders |
 | berichten in de fora | WordPress | ingelogde leden |
-| meldingen en reacties | Redmine | **iedereen**, met je naam |
+| meldingen en reacties | Redmine | ingelogde leden, met je naam |
 | pagina's en opmerkingen in de kennisbank | Wiki.js, en de besloten repo op GitHub | ingelogde leden; in GitHub ook je e-mailadres |
 | toezeggingen voor crowdfunding | WordPress, CiviCRM | zie [Crowdfunding](/algemeen/crowdfunding) |
 
@@ -30,7 +30,7 @@ Het platform gebruikt geen trackers en geen advertenties, en vraagt geen profiel
 
 ## Een fout of een lek gezien?
 
-- Een kwetsbaarheid in de software: meld haar **niet** in Redmine (dat is openbaar), maar per mail aan [info@digitaalgemeengoed.nl](mailto:info@digitaalgemeengoed.nl), met *Beveiliging* in het onderwerp.
+- Een kwetsbaarheid in de software: meld haar **niet** in Redmine (dat zien alle leden), maar per mail aan [info@digitaalgemeengoed.nl](mailto:info@digitaalgemeengoed.nl), met *Beveiliging* in het onderwerp.
 - Persoonsgegevens op een plek waar ze niet horen: meld het bij de kerngroep of via info@digitaalgemeengoed.nl, dan halen we ze weg.
 
 ## Beveiliging van je account

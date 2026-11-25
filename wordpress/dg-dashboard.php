@@ -207,7 +207,10 @@ function dg_db_navigatie( WP_User $gebruiker ): string {
 // Midden: projectupdates (Redmine, nieuws van openbare projecten) en discussies
 // ---------------------------------------------------------------------------
 
-/** Een GET op de API van Redmine, via het interne adres; null als het niet lukt. */
+/**
+ * Een GET op de API van Redmine, via het interne adres; null als het niet lukt.
+ * Met de sleutel van het account "site": Redmine is alleen voor ingelogde leden.
+ */
 function dg_db_redmine( string $pad ): ?array {
 	if ( ! dg_module( 'projecten' ) ) {
 		return null;
@@ -216,7 +219,12 @@ function dg_db_redmine( string $pad ): ?array {
 	if ( ! $basis ) {
 		return null;
 	}
-	$antwoord = wp_remote_get( $basis . $pad, array( 'timeout' => 5, 'headers' => array( 'Accept' => 'application/json' ) ) );
+	$koppen  = array( 'Accept' => 'application/json' );
+	$sleutel = (string) getenv( 'DG_REDMINE_SITE_KEY' );
+	if ( '' !== $sleutel ) {
+		$koppen['X-Redmine-API-Key'] = $sleutel;
+	}
+	$antwoord = wp_remote_get( $basis . $pad, array( 'timeout' => 5, 'headers' => $koppen ) );
 	if ( is_wp_error( $antwoord ) || 200 !== wp_remote_retrieve_response_code( $antwoord ) ) {
 		return null;
 	}
@@ -235,7 +243,7 @@ add_filter(
 	2
 );
 
-/** De laatste drie nieuwsberichten van de openbare projecten, met de fase van het project. */
+/** De laatste drie nieuwsberichten van de projecten, met de fase van het project. */
 function dg_db_projectupdates_gegevens(): array {
 	$cache = get_transient( 'dg_db_projectupdates' );
 	if ( is_array( $cache ) ) {

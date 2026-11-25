@@ -13,7 +13,7 @@ Op het platform komt het werk van het netwerk samen. Je logt overal in met **het
 | Site | [digitaalgemeengoed.nl](https://digitaalgemeengoed.nl) | informatie, projecten, crowdfunding, dashboard voor leden | iedereen; het dashboard alleen leden |
 | Fora en werkgroepen | [/forum/](https://digitaalgemeengoed.nl/forum/), [/groepen/](https://digitaalgemeengoed.nl/groepen/) | discussie, per werkveld en per project | ingelogde leden |
 | Ledenoverzicht | [/leden/](https://digitaalgemeengoed.nl/leden/) | elkaar vinden | ingelogde leden (e-mailadressen nooit) |
-| Projecten | [projecten.digitaalgemeengoed.nl](https://projecten.digitaalgemeengoed.nl) (Redmine) | meldingen, wensen, roadmap, fase per project | **openbaar** |
+| Projecten | [projecten.digitaalgemeengoed.nl](https://projecten.digitaalgemeengoed.nl) (Redmine) | meldingen, wensen, roadmap, fase per project | ingelogde leden (wat een project is en doet: openbaar op de site) |
 | Kennisbank | kennis.digitaalgemeengoed.nl (deze wiki) | handleidingen, ervaringen, uitleg | ingelogde leden |
 | Architectuurmodellen | [architectuur.digitaalgemeengoed.nl](https://architectuur.digitaalgemeengoed.nl) | ArchiMate-modellen per project | ingelogde leden |
 | Code | [github.com/Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed) | broncode, ook van de site zelf | openbaar (de kennisbank-repo is besloten) |

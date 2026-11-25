@@ -19,7 +19,7 @@ Fouten, wensen en vragen over een oplossing leggen we vast in **Redmine**: [proj
    - wat er gebeurde, met een schermafdruk als dat helpt;
    - in welke omgeving (bijvoorbeeld Word, LibreOffice of Collabora, en de versie).
 
-**Meldingen zijn openbaar.** Zet er geen persoonsgegevens, wachtwoorden of vertrouwelijke stukken in. Gebruik testgegevens in een schermafdruk.
+**Alle leden zien je melding.** Zet er geen persoonsgegevens, wachtwoorden of vertrouwelijke stukken in. Gebruik testgegevens in een schermafdruk.
 
 ## Wat er daarna gebeurt
 
