@@ -1,6 +1,6 @@
 # Eén platform, meerdere organisaties — ontwerp (proefstuk)
 
-*Concept, 25 november 2026. Aanleiding: een eigen platform voor de Vakvereniging NL-DIT, naast dat van Digitaal GemeenGoed. Nog niet besloten; ter beoordeling door Erik.*
+*Concept, 25 november 2026; bijgewerkt na het besluit over accounts op meer platforms. Aanleiding: een eigen platform voor de Vakvereniging NL-DIT, naast dat van Digitaal GemeenGoed. Nog niet besloten; ter beoordeling door Erik.*
 
 ## Uitgangspunten (Erik, 25 november 2026)
 
@@ -85,44 +85,84 @@ Een grens: modules buiten WordPress (Keycloak, Wiki.js, Element, Redmine, Docume
 
 ## Eén account op meer platforms
 
-**Doel:** een gebruiker van DGG kan op het platform van NL-DIT inloggen met zijn DGG-account, als hij dat wil, en andersom. De organisaties blijven juridisch gescheiden.
+**Besluit (Erik, 25 november 2026): accounts uitwisselen (provisioning), maar alleen op keuze van de gebruiker.** Er zijn twee manieren om het te starten, en ze sluiten elkaar niet uit:
 
-### Drie mogelijkheden
+1. **Vanuit de eigen instellingen** op het platform waar de gebruiker al lid is. De gebruiker kiest het andere platform en geeft akkoord om zijn gegevens door te geven.
+2. **Bij het inloggen op het nieuwe platform**, met *Inloggen met je account bij …* (gekoppeld inloggen).
 
-**A. Gekoppeld inloggen (identity brokering, OIDC) — aanbevolen om mee te beginnen.**
-Elke Keycloak kent de andere als *identity provider*. Op het inlogscherm van NL-DIT staat dan *Inloggen met je account bij Digitaal GemeenGoed*. Bij de eerste keer maakt NL-DIT een eigen account aan, gekoppeld aan dat van DGG, met naam en e-mail. Daarna geeft de gebruiker op NL-DIT nog akkoord met de voorwaarden van NL-DIT. In het eigen account (*Gekoppelde accounts*, standaard in Keycloak) kan de gebruiker de koppeling zien en verbreken.
+In beide gevallen krijgt de gebruiker op elk platform een eigen account; de wachtwoorden mogen verschillen. Lidmaatschap blijft een eigen relatie met elke organisatie, met eigen voorwaarden en een eigen grondslag. Het doorgeven van gegevens is dus nog geen lidmaatschap: dat begint pas als de gebruiker op het nieuwe platform akkoord geeft met de voorwaarden van die organisatie.
 
-- Gegevens gaan alleen over als de gebruiker daar zelf voor kiest, en alleen naam en e-mail. Dat past bij de gescheiden verantwoordelijkheid.
-- Er worden geen wachtwoorden gedeeld en er draait geen synchronisatie op de achtergrond.
-- Elk platform blijft volledig zelfstandig. Valt DGG uit, dan kan de gebruiker op NL-DIT nog inloggen met een eigen wachtwoord (aan te bieden bij de eerste koppeling).
-- Nadeel: bij N platforms zijn er N×(N−1) koppelingen. Bij twee of drie platforms is dat geen probleem.
+### Wat er overgaat
 
-**B. Accounts uitwisselen (provisioning, bijvoorbeeld SCIM).**
-Een nieuw account op het ene platform ontstaat ook op het andere.
-- *Voor:* de gebruiker meldt zich één keer aan en staat meteen ook bij de andere organisatie in de ledenlijst, met mailings.
-- *Tegen:* juist dat is het probleem. Lidmaatschap van een organisatie is een eigen relatie met eigen voorwaarden en een eigen grondslag voor de verwerking. Persoonsgegevens gaan dan naar een andere verwerkingsverantwoordelijke zonder dat de gebruiker daar op dat moment voor kiest. Daar is een gegevensdelingsovereenkomst voor nodig, plus toestemming per platform. Bovendien stuurt SCIM geen wachtwoorden, en heeft Keycloak geen uitgaande SCIM.
-- **Advies:** niet doen. "Naar eigen keuze" is precies wat A biedt.
+Een vaste set, het **netwerkprofiel**. De gebruiker kiest per onderdeel wat mee mag:
 
-**C. Een netwerk-account (één centrale inlog voor het netwerk).**
-Een kleine, aparte Keycloak voor het netwerk, waar alle platforms naar koppelen zoals bij A.
-- *Voor:* het aantal koppelingen groeit met N, niet met N². Ook is er één plek om het netwerk te beheren.
-- *Tegen:* er is een derde partij nodig die deze inlog beheert, met een eigen verantwoordelijkheid en een eigen server. Zolang er twee of drie platforms zijn, is dat meer werk dan het oplevert.
-- **Advies:** pas overwegen vanaf vier of meer platforms. Doordat A en C hetzelfde mechanisme gebruiken, is de overstap later eenvoudig.
+| Onderdeel | Bron | Standaard aangevinkt |
+|---|---|---|
+| Voornaam, achternaam, e-mail | Keycloak | ja (nodig voor een account) |
+| Organisatie, functie, werkveld | Keycloak | ja |
+| Profieltekst, foto, links | BuddyPress | nee |
+
+**Nooit mee:** wachtwoorden, groepen en rollen (bijvoorbeeld kerngroep), toestemming voor mailings, gegevens uit CiviCRM, berichten en lidmaatschap van werkgroepen. Toestemming voor mailings vraagt elke organisatie zelf.
+
+### Manier 1: vanuit de instellingen
+
+Op een nieuwe pagina **Mijn platforms** in het persoonlijke menu (een gewone WordPress-pagina):
+
+1. De gebruiker ziet de gekoppelde platforms, met naam, korte omschrijving en een link naar hun voorwaarden en privacyverklaring.
+2. Bij *Account aanmaken bij NL-DIT* kiest hij welke onderdelen meegaan en geeft hij akkoord: "Ik geef Digitaal GemeenGoed opdracht om deze gegevens door te geven aan Vakvereniging NL-DIT."
+3. DGG stuurt het netwerkprofiel naar NL-DIT (zie "Techniek").
+4. NL-DIT maakt het account aan met de status **in afwachting** en stuurt de gebruiker een mail: "Je account bij NL-DIT staat klaar. Rond het af door de voorwaarden te lezen en een wachtwoord te kiezen, of door in te loggen met je DGG-account. Was jij dit niet? Klik dan hier, dan verdwijnt het."
+5. Na akkoord met de voorwaarden van NL-DIT is het account actief: zichtbaar in de ledenlijst en bruikbaar voor de modules.
+
+Een account dat na 30 dagen nog in afwachting is, verwijdert NL-DIT vanzelf. Dat volgt uit dataminimalisatie: zonder lidmaatschap is er geen reden om de gegevens te bewaren.
+
+### Manier 2: bij het inloggen op het nieuwe platform
+
+1. Op het inlogscherm van NL-DIT kiest de gebruiker *Inloggen met je account bij Digitaal GemeenGoed*.
+2. Keycloak van DGG vraagt eerst toestemming: "Vakvereniging NL-DIT wil je netwerkprofiel ontvangen." De gebruiker ziet welke onderdelen dat zijn en kan de onderdelen kiezen die niet standaard aangevinkt staan.
+3. NL-DIT maakt het account aan, al gekoppeld aan DGG, en vraagt direct akkoord met de eigen voorwaarden. Daarna is het account actief.
+4. Later kan de gebruiker ook een eigen wachtwoord bij NL-DIT instellen. Dan kan hij inloggen zonder DGG.
+
+### Daarna: bijhouden of niet
+
+Na het aanmaken gaat er standaard niets meer over. Op *Mijn platforms* kan de gebruiker per platform aanzetten: **"Wijzigingen in mijn profiel ook doorgeven"**. Doorlopend doorgeven is een doorlopende verstrekking, en daarom een aparte keuze. Uitzetten stopt het doorgeven. Het account bij de andere organisatie blijft dan bestaan: opzeggen doet de gebruiker bij die organisatie zelf, en de pagina linkt daarheen.
+
+Elke wijziging van een keuze komt in een **logboek van toestemmingen**, op beide platforms: wie, wanneer, welke onderdelen, welk platform en welke versie van de tekst.
+
+### Techniek
+
+- **Eén ontvangstpunt per platform:** een *netwerk-API* in dg-beheer, op `beheer.<domein>/netwerk/`. Die ontvangt een netwerkprofiel in het formaat van SCIM 2.0 (`User`, met een eigen uitbreiding voor organisatie, functie, werkveld en profiel). Dit is een eigen ontvangstpunt en niet de SCIM van Keycloak zelf, omdat de ontvangende kant eigen regels toepast: in afwachting, voorwaarden, de controlemail, opruimen na 30 dagen, de foto naar BuddyPress, het logboek. SCIM als formaat houdt de deur open voor platforms die niet op deze code draaien.
+- **Manier 1** (push): dg-beheer van DGG stuurt een `POST /netwerk/Users` naar NL-DIT. Elke koppeling heeft eigen inloggegevens (OAuth2 client credentials), met een limiet op het aantal aanvragen. Wijzigingen gaan als `PATCH`, alleen als de gebruiker dat heeft aangezet.
+- **Manier 2** (pull): het standaard gekoppelde inloggen van Keycloak (identity provider, OIDC). De client van NL-DIT bij DGG staat op *Consent required* en heeft een scope `netwerkprofiel`. De onderdelen uit Keycloak komen mee in het token. Profieltekst, foto en links haalt NL-DIT daarna met datzelfde token op bij `GET /netwerk/Me` van DGG.
+- **Bestaat het e-mailadres al bij NL-DIT?** Dan wordt er geen tweede account aangemaakt. NL-DIT stuurt een mail naar dat adres met het voorstel om de twee accounts te koppelen.
+- **E-mailverificatie:** NL-DIT vertrouwt een adres dat de partner al heeft bevestigd. Dat is een instelling per koppeling. De controlemail uit stap 4 werkt bovendien als tweede slot.
+
+### De keerzijde, en hoe het ontwerp die opvangt
+
+- *Gegevens bij een andere verantwoordelijke zonder lidmaatschap.* Het account blijft in afwachting tot de gebruiker akkoord geeft met de voorwaarden, en verdwijnt na 30 dagen.
+- *Was het de gebruiker wel zelf?* De controlemail van het ontvangende platform met *Was jij dit niet?*, en het logboek aan beide kanten.
+- *Een gehackte of onbetrouwbare partner* kan accounts aanmaken bij de anderen. Daartegen helpen eigen inloggegevens per koppeling, een limiet, de status in afwachting en de controlemail. En een koppeling is met één regel uit te zetten.
+- *Privacyverklaringen.* Beide verklaringen moeten het doorgeven noemen: de verzendende kant (op verzoek van de gebruiker) en de ontvangende kant (wat er binnenkomt en hoe lang het blijft).
 
 ### Daarnaast: de inlog van de eigen organisatie
 
-Veel leden werken bij een gemeente met een eigen inlog (meestal Entra ID). Keycloak kan die per organisatie koppelen; dat staat al in het ontwerp van DGG (*Organizations*). Koppelen twee platforms allebei de inlog van bijvoorbeeld Haarlem, dan gebruikt een medewerker van Haarlem op beide platforms hetzelfde werkaccount. De platforms hoeven daarvoor niets uit te wisselen. Dit vervangt A niet (zzp'ers, marktpartijen en kleine organisaties hebben geen eigen inlog), maar het vult A wel aan: voor ambtenaren is het het eerlijkste "één account".
+Veel leden werken bij een gemeente met een eigen inlog (meestal Entra ID). Keycloak kan die per organisatie koppelen; dat staat al in het ontwerp van DGG (*Organizations*). Koppelen twee platforms allebei de inlog van bijvoorbeeld Haarlem, dan logt een medewerker van Haarlem op beide in met hetzelfde werkaccount. Dat staat los van het uitwisselen hierboven en vult het aan.
 
 ### In `organisatie.yml`
 
 ```yaml
 netwerk:
   - naam: Digitaal GemeenGoed
-    uitgever: https://aanmelden.digitaalgemeengoed.nl/realms/gemeenschap
-    # client-id en geheim staan in .env (NETWERK_DGG_ID, NETWERK_DGG_GEHEIM)
+    adres: https://digitaalgemeengoed.nl
+    uitgever: https://aanmelden.digitaalgemeengoed.nl/realms/gemeenschap   # voor manier 2
+    netwerk_api: https://beheer.digitaalgemeengoed.nl/netwerk/             # voor manier 1
+    vertrouw_emailverificatie: true
+    # inloggegevens in .env: NETWERK_DGG_ID, NETWERK_DGG_GEHEIM
 ```
 
-Een koppeling werkt alleen als beide kanten haar instellen. NL-DIT neemt DGG op als identity provider, en DGG registreert NL-DIT als client, en andersom. Daar gaat een afspraak tussen de twee organisaties aan vooraf, maar het is geen gegevensdeling: de gebruiker kiest zelf.
+Een koppeling werkt alleen als beide kanten haar instellen. Daar gaat een afspraak tussen de twee organisaties aan vooraf: een korte overeenkomst over het doorgeven op verzoek van de gebruiker.
+
+Bij vier of meer platforms groeit het aantal koppelingen snel (N×(N−1)). Een centraal netwerkregister kan dan later de lijst met platforms en hun sleutels bijhouden; de uitwisseling zelf blijft tussen twee platforms.
 
 ## Sturen vanuit Git
 
@@ -141,11 +181,12 @@ Wie wat mag, regelt de organisatie op GitHub. Bijvoorbeeld: de redactie maakt pu
 1. **Algemeen maken in de huidige repo.** Naam, logo en kleuren komen uit configuratie, modules worden schakelbaar en Redmine wordt optioneel. Voor DGG verandert er niets zichtbaars.
 2. **Splitsen.** De code gaat naar de nieuwe platform-repo. `Digitaal-Gemeengoed/gemeenschap` blijft bestaan als de organisatie-repo van DGG, met alleen nog configuratie, huisstijl en inhoud. De server van DGG gaat over zonder opnieuw te installeren.
 3. **NL-DIT neerzetten** op de nieuwe VPS, met eigen domein, SMTP, huisstijl en inhoud.
-4. **Koppelen** van DGG en NL-DIT (mogelijkheid A), na afspraak tussen de twee organisaties.
+4. **Netwerk:** de netwerk-API in dg-beheer, de pagina *Mijn platforms*, gekoppeld inloggen met toestemming, en daarna de koppeling van DGG en NL-DIT na afspraak tussen de twee organisaties.
 
 ## Open vragen
 
 - Het domein van NL-DIT, en de SMTP-dienst (en het afzendadres) die NL-DIT gebruikt.
 - Wie bij NL-DIT de repo beheert en tags zet.
 - Waar de platform-repo komt te staan: onder Digitaal-Gemeengoed, of in een neutrale organisatie op GitHub. Dat laatste past beter als het netwerk groeit.
-- Moet een account op het ene platform ook op het andere verwijderd worden als de gebruiker dat vraagt? Bij A niet vanzelf: elk platform heeft zijn eigen account. Op de pagina met voorwaarden moet dat duidelijk staan.
+- Opzeggen of verwijderen gebeurt per platform. Moet *Mijn platforms* een knop krijgen die het andere platform om verwijdering vraagt (ook via de netwerk-API), of volstaat een link naar de opzegpagina van de andere organisatie?
+- Wie stelt de korte overeenkomst tussen organisaties op die bij een koppeling hoort?
