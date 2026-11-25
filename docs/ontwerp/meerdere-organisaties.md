@@ -41,7 +41,7 @@ modules:
   - beheer
   # - projecten
 thema: standaard              # of: eigen (map thema/) of de naam van een thema op wordpress.org
-netwerk: []                   # gekoppelde platforms, zie "Eén account op meer platforms"
+netwerk: aan                  # verbinden met andere platforms mag; de verbindingen zelf staan in Beheer
 ```
 
 ## Modules
@@ -125,7 +125,7 @@ Een account dat na 30 dagen nog in afwachting is, verwijdert NL-DIT vanzelf. Dat
 
 ### Daarna: bijhouden of niet
 
-Na het aanmaken gaat er standaard niets meer over. Op *Mijn platforms* kan de gebruiker per platform aanzetten: **"Wijzigingen in mijn profiel ook doorgeven"**. Doorlopend doorgeven is een doorlopende verstrekking, en daarom een aparte keuze. Uitzetten stopt het doorgeven. Het account bij de andere organisatie blijft dan bestaan: opzeggen doet de gebruiker bij die organisatie zelf, en de pagina linkt daarheen.
+Na het aanmaken gaat er standaard niets meer over. Op *Mijn platforms* kan de gebruiker per platform aanzetten: **"Wijzigingen in mijn profiel ook doorgeven"**. Doorlopend doorgeven is een doorlopende verstrekking, en daarom een aparte keuze. Uitzetten stopt het doorgeven. Het account bij de andere organisatie blijft dan bestaan: opzeggen doet de gebruiker bij die organisatie zelf, en de pagina linkt naar haar opzegpagina. **Besluit (Erik, 25 november 2026):** geen knop om op afstand te laten verwijderen. Zulke acties horen thuis op het platform zelf.
 
 Elke wijziging van een keuze komt in een **logboek van toestemmingen**, op beide platforms: wie, wanneer, welke onderdelen, welk platform en welke versie van de tekst.
 
@@ -141,28 +141,33 @@ Elke wijziging van een keuze komt in een **logboek van toestemmingen**, op beide
 
 - *Gegevens bij een andere verantwoordelijke zonder lidmaatschap.* Het account blijft in afwachting tot de gebruiker akkoord geeft met de voorwaarden, en verdwijnt na 30 dagen.
 - *Was het de gebruiker wel zelf?* De controlemail van het ontvangende platform met *Was jij dit niet?*, en het logboek aan beide kanten.
-- *Een gehackte of onbetrouwbare partner* kan accounts aanmaken bij de anderen. Daartegen helpen eigen inloggegevens per koppeling, een limiet, de status in afwachting en de controlemail. En een koppeling is met één regel uit te zetten.
+- *Een gehackte of onbetrouwbare partner* kan accounts aanmaken bij de anderen. Daartegen helpen eigen inloggegevens per koppeling, een limiet, de status in afwachting en de controlemail. En elke kant kan een verbinding in Beheer direct pauzeren.
 - *Privacyverklaringen.* Beide verklaringen moeten het doorgeven noemen: de verzendende kant (op verzoek van de gebruiker) en de ontvangende kant (wat er binnenkomt en hoe lang het blijft).
 
 ### Daarnaast: de inlog van de eigen organisatie
 
 Veel leden werken bij een gemeente met een eigen inlog (meestal Entra ID). Keycloak kan die per organisatie koppelen; dat staat al in het ontwerp van DGG (*Organizations*). Koppelen twee platforms allebei de inlog van bijvoorbeeld Haarlem, dan logt een medewerker van Haarlem op beide in met hetzelfde werkaccount. Dat staat los van het uitwisselen hierboven en vult het aan.
 
-### In `organisatie.yml`
+### Platforms verbinden (in Beheer)
 
-```yaml
-netwerk:
-  - naam: Digitaal GemeenGoed
-    adres: https://digitaalgemeengoed.nl
-    uitgever: https://aanmelden.digitaalgemeengoed.nl/realms/gemeenschap   # voor manier 2
-    netwerk_api: https://beheer.digitaalgemeengoed.nl/netwerk/             # voor manier 1
-    vertrouw_emailverificatie: true
-    # inloggegevens in .env: NETWERK_DGG_ID, NETWERK_DGG_GEHEIM
-```
+**Besluit (Erik, 25 november 2026):** platforms verbinden gaat via een procedure in de module Beheer, met standaardvoorwaarden die beide organisaties accepteren. De voorwaarden staan in concept in [`netwerkvoorwaarden.md`](netwerkvoorwaarden.md).
 
-Een koppeling werkt alleen als beide kanten haar instellen. Daar gaat een afspraak tussen de twee organisaties aan vooraf: een korte overeenkomst over het doorgeven op verzoek van de gebruiker.
+Een verbinding staat dus niet in Git maar in Beheer. Ze bevat geheimen, en elke organisatie moet haar zelf aangaan en kunnen verbreken. In `organisatie.yml` staat alleen of verbinden mag (`netwerk: aan`).
 
-Bij vier of meer platforms groeit het aantal koppelingen snel (N×(N−1)). Een centraal netwerkregister kan dan later de lijst met platforms en hun sleutels bijhouden; de uitwisseling zelf blijft tussen twee platforms.
+**Wie mag wat:**
+- **Beheerders** (`/site/beheer`) zetten een verbinding klaar en voeren de techniek uit.
+- **Accepteren** van de voorwaarden doet iemand die de organisatie mag binden. Bij DGG is dat de kerngroep; elke organisatie wijst daarvoor zelf een groep aan in Keycloak (`netwerk_accepteren: /netwerk/kerngroep`).
+
+**De procedure:**
+
+1. **Verzoek.** Een beheerder van DGG vult in Beheer het adres van het andere platform in (`https://nl-dit.nl`). Beheer haalt daar de gegevens van het platform op: `/.well-known/dg-netwerk`, met naam, organisatie, netwerk-API, uitgever en de versie van de voorwaarden. Beheer toont die ter controle en stuurt een verbindingsverzoek.
+2. **Controlecode.** Beide kanten tonen dezelfde code van zes tekens. De beheerders vergelijken die buiten het platform om, per mail of telefoon. Zo kan niemand zich voordoen als een ander platform.
+3. **Accepteren.** Bij NL-DIT verschijnt het verzoek in Beheer. Iemand die daartoe bevoegd is, leest de voorwaarden en accepteert ze. Daarna doet een bevoegde bij DGG hetzelfde. Bij elke acceptatie wordt vastgelegd wie, wanneer, welke versie en namens welke organisatie.
+4. **Sleutels uitwisselen.** Na de tweede acceptatie maakt elk platform zelf de inloggegevens voor de ander aan: een client in Keycloak voor het gekoppelde inloggen en inloggegevens voor de netwerk-API. Die gaan via de verbinding uit stap 1 over, nooit via mail. Daarna staat de verbinding **actief** en verschijnt het platform op *Mijn platforms* bij de gebruikers.
+5. **Pauzeren of beëindigen** kan elke kant op elk moment, eenzijdig. Pauzeren: tijdelijk niets uitwisselen. Beëindigen: de sleutels gaan weg en de ander krijgt een bericht. Accounts die al zijn aangemaakt, blijven bestaan: dat is de eigen relatie van de gebruiker met die organisatie.
+6. **Nieuwe versie van de voorwaarden.** Beide kanten moeten die opnieuw accepteren. Tot dan blijft de verbinding op de oude versie draaien, maximaal 60 dagen. Daarna wordt ze gepauzeerd.
+
+Bij vier of meer platforms groeit het aantal verbindingen snel (N×(N−1)). Een centraal netwerkregister kan dan later de lijst met platforms bijhouden; de verbindingen zelf blijven tussen twee platforms.
 
 ## Sturen vanuit Git
 
@@ -172,7 +177,7 @@ Bij vier of meer platforms groeit het aantal koppelingen snel (N×(N−1)). Een 
 | Huisstijl of thema | wijziging plus een versie-tag | bij de volgende uitrol |
 | Een module aan of uit | één regel in `organisatie.yml` plus een tag | idem; een nieuwe module heeft eerst een DNS-record nodig |
 | Bijwerken naar een nieuwe versie van het platform | `platform:` ophogen plus een tag | idem; eerst een back-up, bij een fout terug naar de vorige versie |
-| Een koppeling met een ander platform | `netwerk:` aanvullen, geheim in `.env` | na afspraak met de andere organisatie |
+| Een verbinding met een ander platform | niet in Git: de procedure in Beheer (verzoek, controlecode, acceptatie van de voorwaarden aan beide kanten) | zodra beide kanten hebben geaccepteerd |
 
 Wie wat mag, regelt de organisatie op GitHub. Bijvoorbeeld: de redactie maakt pull requests, het bestuur of de kerngroep keurt ze goed (branch protection op `main`), en alleen beheerders zetten tags. Wie een tag zet, krijgt een mail bij een geslaagde of mislukte uitrol (`UITROL_MELDEN`).
 
@@ -188,5 +193,4 @@ Wie wat mag, regelt de organisatie op GitHub. Bijvoorbeeld: de redactie maakt pu
 - Het domein van NL-DIT, en de SMTP-dienst (en het afzendadres) die NL-DIT gebruikt.
 - Wie bij NL-DIT de repo beheert en tags zet.
 - Waar de platform-repo komt te staan: onder Digitaal-Gemeengoed, of in een neutrale organisatie op GitHub. Dat laatste past beter als het netwerk groeit.
-- Opzeggen of verwijderen gebeurt per platform. Moet *Mijn platforms* een knop krijgen die het andere platform om verwijdering vraagt (ook via de netwerk-API), of volstaat een link naar de opzegpagina van de andere organisatie?
-- Wie stelt de korte overeenkomst tussen organisaties op die bij een koppeling hoort?
+- De netwerkvoorwaarden (concept) laten toetsen door een jurist of de functionaris gegevensbescherming van een van de organisaties.
