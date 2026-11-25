@@ -1005,9 +1005,11 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					WP_CLI::log( "Voorbeeld /$slug/ verwijderd." );
 				}
 			}
-			// Logo en sitepictogram uit het thema (wordpress/thema/…/assets/).
-			dg_thema_beeld( 'uil.png', static fn( $id ) => set_theme_mod( 'custom_logo', $id ) );
-			dg_thema_beeld( 'icoon.png', static fn( $id ) => update_option( 'site_icon', $id ) );
+			// Logo en sitepictogram uit huisstijl/ (organisatie.yml). De bronnamen
+			// "thema/uil.png" en "thema/icoon.png" blijven: zo herkent een server
+			// van vóór 0.24.0 het beeld dat al in de mediabibliotheek staat.
+			dg_thema_beeld( dg_huisstijl_pad( 'logo.png' ), 'thema/uil.png', static fn( $id ) => set_theme_mod( 'custom_logo', $id ) );
+			dg_thema_beeld( dg_huisstijl_pad( 'icoon.png' ), 'thema/icoon.png', static fn( $id ) => update_option( 'site_icon', $id ) );
 			// De tabel voor toezeggingen (dg-crowdfunding.php).
 			if ( function_exists( 'dg_uit_installeer' ) ) {
 				dg_uit_installeer();
@@ -1015,8 +1017,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			if ( function_exists( 'dg_cf_installeer' ) ) {
 				dg_cf_installeer();
 			}
-			// Werkgroepen: BuddyPress-groepen, elk met een eigen forum onder "Werkgroepen".
-			dg_werkgroepen();
+			// Fora en werkgroepen uit inhoud/fora.md (ook bij elke wp dg inhoud).
+			dg_fora_en_werkgroepen( '/inhoud' );
 			// De adressen van BuddyPress in het Nederlands.
 			if ( function_exists( 'bp_core_get_directory_page_ids' ) ) {
 				$adressen = array( 'members' => 'leden', 'groups' => 'groepen', 'activity' => 'activiteit' );
@@ -1025,23 +1027,6 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						wp_update_post( array( 'ID' => $id, 'post_name' => $adressen[ $onderdeel ] ) );
 						WP_CLI::log( "BuddyPress: /{$adressen[ $onderdeel ]}/." );
 					}
-				}
-			}
-			if ( function_exists( 'bbp_insert_forum' ) ) {
-				$fora = array(
-					'algemeen'         => array( 'Algemeen', 'Kennismaken, vragen, aankondigingen.' ),
-					'office-assistent' => array( 'Office Assistent', 'Gebruik, ervaringen en ideeën voor de Office Assistent.' ),
-					'beheer'           => array( 'Beheer', 'Installeren, bijwerken, koppelen en beheren.' ),
-					'development'      => array( 'Development', 'Code, architectuur, standaarden en bijdragen.' ),
-					'besluitvorming'   => array( 'Besluitvorming', 'Aanbesteden, invoeren, samenwerken tussen gemeenten.' ),
-				);
-				foreach ( $fora as $slug => [ $titel, $omschrijving ] ) {
-					if ( get_page_by_path( $slug, OBJECT, 'forum' ) ) {
-						WP_CLI::log( "Forum $titel bestaat al." );
-						continue;
-					}
-					bbp_insert_forum( array( 'post_name' => $slug, 'post_title' => $titel, 'post_content' => $omschrijving ) );
-					WP_CLI::log( "Forum $titel aangemaakt." );
 				}
 			}
 			// De fora onder /forum/ (forum.<domein> verwijst daarheen).
@@ -1057,22 +1042,68 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	);
 
 	/**
+	 * Leest <map>/fora.md: per kopje (## Fora, ## Werkgroepen) regels
+	 * "- adres: Naam — omschrijving". Zonder bestand: alleen het forum Algemeen.
+	 *
+	 * @return array{fora: array<string, array{0: string, 1: string}>, werkgroepen: array<string, array{0: string, 1: string}>}
+	 */
+	function dg_fora_lezen( string $map ): array {
+		$uit     = array( 'fora' => array(), 'werkgroepen' => array() );
+		$bestand = rtrim( $map, '/' ) . '/fora.md';
+		if ( ! is_file( $bestand ) ) {
+			$uit['fora']['algemeen'] = array( 'Algemeen', 'Kennismaken, vragen, aankondigingen.' );
+			return $uit;
+		}
+		$deel = '';
+		foreach ( preg_split( '/\R/', (string) file_get_contents( $bestand ) ) as $nr => $regel ) {
+			if ( preg_match( '/^##\s+(.+?)\s*$/u', $regel, $m ) ) {
+				$kop  = mb_strtolower( $m[1] );
+				$deel = 'fora' === $kop ? 'fora' : ( 'werkgroepen' === $kop ? 'werkgroepen' : '' );
+				continue;
+			}
+			if ( '' === $deel || ! str_starts_with( ltrim( $regel ), '- ' ) ) {
+				continue;
+			}
+			if ( ! preg_match( '/^\s*-\s+([a-z0-9][a-z0-9-]*):\s*(.+?)(?:\s+[—–-]\s+(.+?))?\s*$/u', $regel, $m ) ) {
+				WP_CLI::warning( 'fora.md, regel ' . ( $nr + 1 ) . ': verwacht "- adres: Naam — omschrijving"; overgeslagen.' );
+				continue;
+			}
+			$uit[ $deel ][ $m[1] ] = array( $m[2], $m[3] ?? '' );
+		}
+		return $uit;
+	}
+
+	/** De fora en werkgroepen uit <map>/fora.md: wat ontbreekt, komt erbij. */
+	function dg_fora_en_werkgroepen( string $map ): void {
+		if ( ! function_exists( 'bbp_insert_forum' ) ) {
+			WP_CLI::log( 'Fora overgeslagen: bbPress staat niet aan (module community).' );
+			return;
+		}
+		$lijst = dg_fora_lezen( $map );
+		foreach ( $lijst['fora'] as $slug => [ $titel, $omschrijving ] ) {
+			if ( get_page_by_path( $slug, OBJECT, 'forum' ) ) {
+				continue;
+			}
+			bbp_insert_forum( array( 'post_name' => $slug, 'post_title' => $titel, 'post_content' => $omschrijving ) );
+			WP_CLI::log( "Forum $titel aangemaakt." );
+		}
+		dg_werkgroepen( $lijst['werkgroepen'] );
+	}
+
+	/**
 	 * De werkgroepen. Een groep die al bestaat, blijft zoals beheerders hem
 	 * hebben gemaakt; een groep die ontbreekt, komt erbij, met een forum.
+	 *
+	 * @param array<string, array{0: string, 1: string}> $groepen adres => [naam, omschrijving]
 	 */
-	function dg_werkgroepen(): void {
+	function dg_werkgroepen( array $groepen ): void {
+		if ( ! $groepen ) {
+			return;
+		}
 		if ( ! function_exists( 'groups_create_group' ) || ! function_exists( 'bbp_insert_forum' ) ) {
 			WP_CLI::log( 'Werkgroepen overgeslagen: BuddyPress-groepen of bbPress staan niet aan.' );
 			return;
 		}
-		$groepen  = array(
-			'common-ground'      => array( 'Common Ground', 'Architectuur, API\'s en herbruikbare bouwstenen.' ),
-			'open-overheid'      => array( 'Open Overheid', 'Openbaarmaking, toegankelijkheid en publicatie.' ),
-			'records-management' => array( 'Records Management', 'Metadata, archivering en duurzame toegankelijkheid.' ),
-			'projectportfolio'   => array( 'Projectportfolio', 'Gezamenlijke prioriteiten en het starten van projecten.' ),
-			'developers'         => array( 'Developers & contributors', 'Code, reviews en open samenwerking.' ),
-			'implementatie'      => array( 'Implementatie & beheer', 'Van pilot naar dagelijkse dienstverlening.' ),
-		);
 		$beheer   = get_users( array( 'role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'fields' => 'ID' ) );
 		$maker    = (int) ( $beheer[0] ?? 0 );
 		$wortel   = get_page_by_path( 'werkgroepen', OBJECT, bbp_get_forum_post_type() );
@@ -1122,19 +1153,18 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	}
 
 	/**
-	 * Zet een afbeelding uit de map assets/ van het thema in de mediabibliotheek
+	 * Zet een afbeelding (uit huisstijl/, organisatie.yml) in de mediabibliotheek
 	 * (alleen als die nieuw of veranderd is) en geeft het nummer door.
 	 */
-	function dg_thema_beeld( string $naam, callable $gebruik ): void {
+	function dg_thema_beeld( string $bestand, string $bron, callable $gebruik ): void {
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
-		$bestand = get_stylesheet_directory() . "/assets/$naam";
-		if ( ! is_file( $bestand ) ) {
+		if ( '' === $bestand || ! is_file( $bestand ) ) {
 			return;
 		}
+		$naam  = basename( $bestand );
 		$hash  = hash_file( 'sha256', $bestand );
-		$bron  = "thema/$naam";
 		$oud   = get_posts( array( 'post_type' => 'attachment', 'post_status' => 'any', 'meta_key' => '_dg_bron', 'meta_value' => $bron, 'numberposts' => 1, 'fields' => 'ids' ) );
 		$id    = $oud[0] ?? 0;
 		if ( ! $id || get_post_meta( $id, '_dg_hash', true ) !== $hash ) {

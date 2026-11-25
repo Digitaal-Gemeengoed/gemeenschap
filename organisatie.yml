@@ -14,6 +14,10 @@ soort: coöperatie
 # Eén regel onder de naam.
 omschrijving: Community voor open source en Common Ground in de overheid
 # Op het dashboard, onder "Welkom in de <kort>-community!".
+# In de voet: onder de naam, de alinea eronder, en de regel na "© <jaar> <organisatie> ·".
+slogan: Samen grenzeloos sterk
+over: Een community voor kennisdeling, gezamenlijke ontwikkeling en duurzaam beheer van open source oplossingen voor de overheid.
+voet: in samenwerking met NL-Dit · software open source onder de EUPL; naam en logo zijn beschermd
 welkom: Dé plek voor gemeentelijke professionals, developers, beheerders en beleidsmakers die samen werken aan open, betrouwbare en herbruikbare overheidssoftware.
 
 # De onderdelen. "basis" staat altijd aan: site, leden en profielen, inloggen
@@ -38,3 +42,5 @@ huisstijl:
   kleur: "#14478f"          # hoofdkleur: knoppen, links
   kleur_donker: "#0a2654"   # koppen, balken
   kleur_link: "#1a56a8"
+  accent: "#0066cc"         # knoppen en links van het thema en het inlogscherm
+  accent_donker: "#003c7a"  # idem, bij aanwijzen

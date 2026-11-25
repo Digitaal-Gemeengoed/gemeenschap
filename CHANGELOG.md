@@ -2,7 +2,16 @@
 
 ## Nog niet uitgebracht
 
-### 0.23.0 (in voorbereiding) — het platform algemeen maken
+## 0.24.0 — thema, inlogscherm en werkgroepen algemeen
+
+Fase 2 (eerste deel) uit `docs/ontwerp/meerdere-organisaties.md`. Voor Digitaal GemeenGoed ziet alles er hetzelfde uit.
+
+- **Standaardthema.** Het thema heet nu *Gemeenschapsplatform (standaard)*. Naam, logo, kleuren en de teksten in de voet komen uit `organisatie.yml` (nieuw: `slogan`, `over`, `voet`, en in `huisstijl` de knopkleuren `accent` en `accent_donker`). Het logo komt uit `huisstijl/`, ook in de mediabibliotheek (logo in de kop, sitepictogram).
+- **Inlogscherm** in de kleuren uit `organisatie.yml` (via `/huisstijl/kleuren.css`).
+- **Fora en werkgroepen uit `inhoud/fora.md`** in plaats van een vaste lijst in de code. Een nieuw forum of een nieuwe werkgroep staat er binnen vijf minuten na een wijziging op `main`.
+- **Het logo van DGG staat alleen nog in `huisstijl/`**, niet meer in het thema, het inlogscherm, Documenten of Beheer (die halen het van `/huisstijl/`).
+
+## 0.23.0 — het platform algemeen maken
 
 Fase 1 uit `docs/ontwerp/meerdere-organisaties.md`. Voor Digitaal GemeenGoed verandert er (bijna) niets zichtbaars; de uitzondering staat onderaan.
 

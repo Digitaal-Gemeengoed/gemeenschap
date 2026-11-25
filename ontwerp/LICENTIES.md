@@ -11,10 +11,7 @@ gebruikt hem niet zelf.
 
 | Bestand | Wat | Herkomst | Licentie en voorwaarden |
 |---|---|---|---|
-| `wordpress/thema/digitaalgemeengoed/assets/uil.png` | logo (de uil) in de kop en de voet | het logo van DGG, aangeleverd door Erik Hoekstra; origineel in `ontwerp/logo/dgg-logo.png` | Stichting Digitaal GemeenGoed; **niet** onder de EUPL. Gebruik door anderen alleen zoals de pagina *Colofon* beschrijft. [IN TE VULLEN: wie het logo heeft ontworpen, en of de rechten schriftelijk aan de stichting zijn overgedragen] |
-| `wordpress/thema/digitaalgemeengoed/assets/icoon.png` | sitepictogram (favicon) | uitsnede van het logo | als het logo |
-| `keycloak/themes/digitaalgemeengoed/login/resources/img/uil.png` | logo op het aanmeldscherm | kopie van het logo | als het logo |
-| `huisstijl/logo.png`, `huisstijl/icoon.png` | logo en icoon voor alle modules (via `/huisstijl/`; sinds 0.23.0) | kopieën van het logo en het sitepictogram hierboven | als het logo; een andere organisatie zet hier haar eigen logo |
+| `huisstijl/logo.png`, `huisstijl/icoon.png` | logo (de uil) en sitepictogram, voor de site en alle modules (via `/huisstijl/`) | het logo van DGG, aangeleverd door Erik Hoekstra; origineel in `ontwerp/logo/dgg-logo.png`; het icoon is een uitsnede | Stichting Digitaal GemeenGoed; **niet** onder de EUPL. Gebruik door anderen alleen zoals de pagina *Colofon* beschrijft. [IN TE VULLEN: wie het logo heeft ontworpen, en of de rechten schriftelijk aan de stichting zijn overgedragen] Sinds 0.24.0 staat het logo alleen nog hier, niet meer in het thema of de modules. |
 | `wordpress/thema/digitaalgemeengoed/assets/stad.svg`, `netwerk.svg` | stadsgezicht en netwerklijnen in de opening | eigen tekening, gemaakt voor deze repo | EUPL-1.2, zoals de repo |
 | `wordpress/thema/digitaalgemeengoed/assets/iconen/*.svg` | iconen | eigen tekening, gemaakt voor deze repo | EUPL-1.2, zoals de repo |
 | `inhoud/media/projecten-mizuno-kozuki.jpg` | foto in de opening van *Projecten* | foto van **Mizuno Kozuki** via Unsplash, aangeleverd door Erik Hoekstra; middensectie uitgesneden (16:10) | Unsplash License, zie hieronder. [IN TE VULLEN: link naar de foto op unsplash.com] |

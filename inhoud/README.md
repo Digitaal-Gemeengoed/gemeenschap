@@ -5,7 +5,9 @@ bestand op `main`, dan staat de wijziging binnen vijf minuten op de site. In
 WordPress staan deze pagina's op slot; daar zie je bij elke pagina de link
 **Bewerken op GitHub**.
 
-Nieuws, berichten en de fora horen hier niet: die maak je gewoon in WordPress.
+Nieuws, berichten en de discussies in de fora horen hier niet: die maak je
+gewoon op de site. Welke fora en werkgroepen er zijn, staat wel hier, in
+`fora.md`.
 
 ## Een pagina wijzigen
 

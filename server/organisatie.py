@@ -26,8 +26,12 @@ STANDAARD = {
     "soort": "organisatie",
     "omschrijving": "",
     "welkom": "",
+    "slogan": "",
+    "over": "",
+    "voet": "software open source onder de EUPL",
     "modules": [m for m in MODULES if m != "basis"],
-    "huisstijl": {"kleur": "#14478f", "kleur_donker": "#0a2654", "kleur_link": "#1a56a8"},
+    "huisstijl": {"kleur": "#14478f", "kleur_donker": "#0a2654", "kleur_link": "#1a56a8",
+                  "accent": "#0066cc", "accent_donker": "#003c7a"},
 }
 # Een module die een andere nodig heeft.
 NODIG = {"agenda": ["berichten", "ledenbeheer"], "projecten": ["ledenbeheer"]}
@@ -163,9 +167,14 @@ def env_regels(data):
         "ORG_SOORT=" + q(data["soort"] or "organisatie"),
         "ORG_OMSCHRIJVING=" + q(data["omschrijving"]),
         "ORG_WELKOM=" + q(data["welkom"] or data["omschrijving"]),
+        "ORG_SLOGAN=" + q(data["slogan"]),
+        "ORG_OVER=" + q(data["over"] or data["omschrijving"]),
+        "ORG_VOET=" + q(data["voet"]),
         "ORG_KLEUR=" + q(h["kleur"]),
         "ORG_KLEUR_DONKER=" + q(h["kleur_donker"]),
         "ORG_KLEUR_LINK=" + q(h["kleur_link"]),
+        "ORG_ACCENT=" + q(h["accent"]),
+        "ORG_ACCENT_DONKER=" + q(h["accent_donker"]),
         "DG_MODULES=" + q(",".join(data["modules"])),
     ]
     # Per module die aan staat MODULE_<NAAM>='1', voor compose.yml:

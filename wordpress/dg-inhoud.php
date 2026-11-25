@@ -749,7 +749,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				}
 			}
 
-			// 5. De menu's uit menu.md: alleen naar pagina's die gepubliceerd zijn.
+			// 5. Fora en werkgroepen uit fora.md (alleen wat ontbreekt; dg-gemeenschap.php).
+			if ( ! $droog && function_exists( 'dg_fora_en_werkgroepen' ) ) {
+				dg_fora_en_werkgroepen( $map );
+			}
+
+			// 6. De menu's uit menu.md: alleen naar pagina's die gepubliceerd zijn.
 			if ( is_file( "$map/menu.md" ) ) {
 				$menus = dg_inhoud_menus( (string) file_get_contents( "$map/menu.md" ) );
 				foreach ( $menus as $naam => $items ) {

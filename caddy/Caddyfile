@@ -6,12 +6,12 @@
 # Logo en icoon van de organisatie (huisstijl/ in de repo) op elk adres onder
 # /huisstijl/, zodat elke module ze met een vast pad kan tonen.
 # kleuren.css: de kleuren uit organisatie.yml als CSS-variabelen
-# (--dg-kleur, --dg-kleur-donker, --dg-kleur-link).
+# (--dg-kleur, --dg-kleur-donker, --dg-kleur-link, --dg-accent, --dg-accent-donker).
 (huisstijl) {
 	handle_path /huisstijl/* {
 		@kleuren path /kleuren.css
 		header @kleuren Content-Type "text/css; charset=utf-8"
-		respond @kleuren ":root{--dg-kleur:{$ORG_KLEUR:#14478f};--dg-kleur-donker:{$ORG_KLEUR_DONKER:#0a2654};--dg-kleur-link:{$ORG_KLEUR_LINK:#1a56a8}}" 200
+		respond @kleuren ":root{--dg-kleur:{$ORG_KLEUR:#14478f};--dg-kleur-donker:{$ORG_KLEUR_DONKER:#0a2654};--dg-kleur-link:{$ORG_KLEUR_LINK:#1a56a8};--dg-accent:{$ORG_ACCENT:#0066cc};--dg-accent-donker:{$ORG_ACCENT_DONKER:#003c7a}}" 200
 		root * /srv/huisstijl
 		file_server
 	}

@@ -128,10 +128,14 @@ platform kan zo voor een andere organisatie draaien, met minder onderdelen
 - **Naam, kort, organisatie, soort, omschrijving, welkom:** in de kop, mails,
   het inlogscherm, de kennisbank, Projecten, Documenten, Beheer en de chat.
   `soort` is het woord in zinnen als "de leden van de coöperatie".
-- **Huisstijl:** drie kleuren in `organisatie.yml`, logo en icoon in
-  `huisstijl/`. Caddy zet ze op elk adres onder `/huisstijl/` (de kleuren als
-  `/huisstijl/kleuren.css`). Het WordPress-thema en het inlogscherm hebben nog
-  hun eigen kleuren.
+- **Voet:** `slogan` (onder de naam), `over` (de alinea eronder) en `voet` (de
+  regel na "© jaar organisatie ·").
+- **Huisstijl:** vijf kleuren in `organisatie.yml` (`kleur`, `kleur_donker`,
+  `kleur_link` voor vlakken en koppen; `accent` en `accent_donker` voor knoppen
+  en links van het thema en het inlogscherm), logo en icoon in `huisstijl/`.
+  Caddy zet ze op elk adres onder `/huisstijl/` (de kleuren als
+  `/huisstijl/kleuren.css`).
+- **Fora en werkgroepen:** in `inhoud/fora.md`.
 - **Modules:** basis staat altijd aan. De rest: `ledenbeheer`, `berichten`,
   `agenda` (heeft berichten en ledenbeheer nodig), `kennis`, `architectuur`,
   `bestanden`, `chat`, `community`, `instellingen`, `beheer`, `projecten`

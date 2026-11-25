@@ -1,8 +1,8 @@
 /*
-Theme Name: Digitaal GemeenGoed
+Theme Name: Gemeenschapsplatform (standaard)
 Template: buddyx
-Description: Het thema van digitaalgemeengoed.nl: BuddyX (voor BuddyPress en bbPress) met het logo, de kleuren en de opmaak van Digitaal GemeenGoed. Kleuren en voet staan vast in functions.php; de menu's komen uit inhoud/menu.md in de repo Digitaal-Gemeengoed/gemeenschap.
-Version: 1.2.0
+Description: Het standaardthema van het gemeenschapsplatform: BuddyX (voor BuddyPress en bbPress) met naam, logo, kleuren en voet uit organisatie.yml en huisstijl/. De menu's komen uit inhoud/menu.md.
+Version: 2.0.0
 License: EUPL-1.2
 Text Domain: digitaalgemeengoed
 */
@@ -10,9 +10,10 @@ Text Domain: digitaalgemeengoed
 /* Kleuren uit het logo. Alle tekstkleuren halen WCAG AA op wit; lichtblauw
    (#13aef3) en de hemelkleuren zijn alleen voor vlakken en versiering. */
 :root {
-  --dg-marine: #0a2654;
-  --dg-blauw: #14478f;
-  --dg-link: #1a56a8;
+  /* Uit organisatie.yml (dg-platform.php zet --dg-kleur…); hierachter de terugval. */
+  --dg-marine: var(--dg-kleur-donker, #0a2654);
+  --dg-blauw: var(--dg-kleur, #14478f);
+  --dg-link: var(--dg-kleur-link, #1a56a8);
   --dg-groen: #3f7f1d;
   --dg-paars: #6d28d9;
   --dg-teal: #0f766e;

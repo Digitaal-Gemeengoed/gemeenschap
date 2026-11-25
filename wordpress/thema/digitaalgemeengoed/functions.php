@@ -1,30 +1,40 @@
 <?php
 /**
- * Thema Digitaal GemeenGoed: een kindthema van BuddyX.
+ * Het standaardthema van het gemeenschapsplatform: een kindthema van BuddyX.
  *
- * Kleuren, voet en logo komen uit deze repo. Wat in de Customizer staat,
- * telt voor deze instellingen niet: een wijziging doe je hier, via GitHub.
+ * Naam, kleuren, logo en de teksten in de voet komen uit organisatie.yml en
+ * huisstijl/ (via dg_org() in dg-platform.php). Wat in de Customizer staat,
+ * telt voor deze instellingen niet: een wijziging doe je in organisatie.yml.
+ * (De map heet nog digitaalgemeengoed: WordPress bewaart de menu's en het logo
+ * onder de naam van de map.)
  *
- * @package DigitaalGemeengoed
+ * @package Gemeenschapsplatform
  */
 
 defined( 'ABSPATH' ) || exit;
 
-/** De kleuren uit het logo; tekst en knoppen halen WCAG AA (contrast ≥ 4,5). */
-const DG_KLEUREN = array(
-	'site_primary_color'                  => '#0066cc',
-	'site_links_color'                    => '#0066cc',
-	'site_links_focus_hover_color'        => '#003c7a',
-	'site_title_hover_color'              => '#0066cc',
-	'site_buttons_background_color'       => '#0066cc',
-	'site_buttons_background_hover_color' => '#003c7a',
-	'site_buttons_border_color'           => '#0066cc',
-	'site_buttons_border_hover_color'     => '#003c7a',
-	'site_buttons_text_color'             => '#ffffff',
-	'site_buttons_text_hover_color'       => '#ffffff',
-	'site_footer_links_hover_color'       => '#0066cc',
-	'site_copyright_links_hover_color'    => '#0066cc',
-);
+/**
+ * De kleuren van BuddyX: accent en accent_donker uit organisatie.yml. Kies ze
+ * zo dat witte tekst op de knoppen WCAG AA haalt (contrast ≥ 4,5).
+ */
+function dg_thema_kleuren(): array {
+	$a = function_exists( 'dg_org' ) ? dg_org( 'accent' ) : '#0066cc';
+	$d = function_exists( 'dg_org' ) ? dg_org( 'accent_donker' ) : '#003c7a';
+	return array(
+		'site_primary_color'                  => $a,
+		'site_links_color'                    => $a,
+		'site_links_focus_hover_color'        => $d,
+		'site_title_hover_color'              => $a,
+		'site_buttons_background_color'       => $a,
+		'site_buttons_background_hover_color' => $d,
+		'site_buttons_border_color'           => $a,
+		'site_buttons_border_hover_color'     => $d,
+		'site_buttons_text_color'             => '#ffffff',
+		'site_buttons_text_hover_color'       => '#ffffff',
+		'site_footer_links_hover_color'       => $a,
+		'site_copyright_links_hover_color'    => $a,
+	);
+}
 // BuddyX leest zijn instellingen in één keer (get_theme_mods), dus de vaste
 // waarden gaan over de opgeslagen instellingen heen, niet per instelling.
 // De privacyverklaring staat al in het menu "Voet". Geen zijbalken: de pagina's
@@ -34,7 +44,7 @@ add_filter(
 	'option_theme_mods_' . get_stylesheet(),
 	static fn( $mods ) => array_merge(
 		(array) $mods,
-		DG_KLEUREN,
+		dg_thema_kleuren(),
 		array(
 			'site_custom_colors'          => true,
 			// Breed genoeg voor logo, ondertitel en het hele hoofdmenu (anders "More").
@@ -72,15 +82,21 @@ function dg_voet(): string {
 		}
 	}
 	$link = static fn( $item ) => '<a href="' . esc_url( $item->url ) . '">' . esc_html( $item->title ) . '</a>';
-	$html = '<div class="dg-voet-boven"><div class="dg-voet-merk"><img src="' . esc_url( get_stylesheet_directory_uri() . '/assets/uil.png' ) . '" alt="" width="40" height="78"><div><strong>Digitaal<br>GemeenGoed</strong><span>Samen grenzeloos sterk</span></div>'
-		. '<p>Een community voor kennisdeling, gezamenlijke ontwikkeling en duurzaam beheer van open source oplossingen voor de overheid.</p></div>';
+	// De naam op twee regels (bij de eerste spatie), zoals in het logo.
+	$naam   = esc_html( dg_org( 'naam' ) );
+	$naam   = preg_replace( '/ /', '<br>', $naam, 1 );
+	$slogan = dg_org( 'slogan' );
+	$over   = dg_org( 'over' );
+	$html   = '<div class="dg-voet-boven"><div class="dg-voet-merk"><img src="' . esc_url( home_url( '/huisstijl/logo.png' ) ) . '" alt="" height="78"><div><strong>' . $naam . '</strong>' . ( '' !== $slogan ? '<span>' . esc_html( $slogan ) . '</span>' : '' ) . '</div>'
+		. ( '' !== $over ? '<p>' . esc_html( $over ) . '</p>' : '' ) . '</div>';
 	foreach ( $kolommen as $kolom ) {
 		if ( empty( $kolom['titel'] ) || empty( $kolom['links'] ) ) {
 			continue;
 		}
 		$html .= '<div class="dg-voet-kolom"><h3>' . esc_html( $kolom['titel'] ) . '</h3><ul>' . implode( '', array_map( static fn( $i ) => '<li>' . $link( $i ) . '</li>', $kolom['links'] ) ) . '</ul></div>';
 	}
-	$html .= '</div><div class="dg-voet-onder"><span>© ' . esc_html( wp_date( 'Y' ) ) . ' Stichting Digitaal GemeenGoed · in samenwerking met NL-Dit · software open source onder de EUPL; naam en logo zijn beschermd</span>'
+	$voet  = dg_org( 'voet' );
+	$html .= '</div><div class="dg-voet-onder"><span>© ' . esc_html( wp_date( 'Y' ) . ' ' . dg_org( 'organisatie' ) . ( '' !== $voet ? ' · ' . $voet : '' ) ) . '</span>'
 		. ( $onder ? '<span class="dg-voet-links">' . implode( '', array_map( $link, $onder ) ) . '</span>' : '' ) . '</div>';
 	return $html;
 }

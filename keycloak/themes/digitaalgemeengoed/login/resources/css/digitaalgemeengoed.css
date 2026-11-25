@@ -1,8 +1,10 @@
-/* Digitaal GemeenGoed: logo en kleuren over het standaardthema van Keycloak (PatternFly 5).
-   De kleuren komen uit het logo en zijn dezelfde als op de site (wordpress/thema/). */
+/* Logo en kleuren van de organisatie over het standaardthema van Keycloak
+   (PatternFly 5). Logo en kleuren komen uit organisatie.yml en huisstijl/, via
+   Caddy (/huisstijl/); dezelfde als op de site. */
+@import url("/huisstijl/kleuren.css");
 :root {
-  --dg-blauw: #0066cc;
-  --dg-blauw-donker: #003c7a;
+  --dg-blauw: var(--dg-accent, #0066cc);
+  --dg-blauw-donker: var(--dg-accent-donker, #003c7a);
   --dg-achtergrond: #f4f7fb;
   --pf-v5-global--primary-color--100: var(--dg-blauw);
   --pf-v5-global--primary-color--200: var(--dg-blauw-donker);

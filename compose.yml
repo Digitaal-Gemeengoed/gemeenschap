@@ -33,6 +33,11 @@ x-organisatie: &organisatie
   ORG_SOORT: ${ORG_SOORT:-}
   ORG_OMSCHRIJVING: ${ORG_OMSCHRIJVING:-}
   ORG_WELKOM: ${ORG_WELKOM:-}
+  ORG_SLOGAN: ${ORG_SLOGAN:-}
+  ORG_OVER: ${ORG_OVER:-}
+  ORG_VOET: ${ORG_VOET:-}
+  ORG_ACCENT: ${ORG_ACCENT:-}
+  ORG_ACCENT_DONKER: ${ORG_ACCENT_DONKER:-}
   ORG_KLEUR: ${ORG_KLEUR:-}
   ORG_KLEUR_DONKER: ${ORG_KLEUR_DONKER:-}
   ORG_KLEUR_LINK: ${ORG_KLEUR_LINK:-}
@@ -73,6 +78,8 @@ x-wordpress-mappen: &wordpress-mappen
   - wphtml:/var/www/html
   # Organisatie en modules (organisatie.yml): als eerste geladen.
   - ./wordpress/dg-platform.php:/var/www/html/wp-content/mu-plugins/dg-0-platform.php:ro
+  # Logo en icoon (huisstijl/): voor het logo in de kop en het sitepictogram.
+  - ./huisstijl:/var/www/huisstijl:ro
   - ./wordpress/dg-gemeenschap.php:/var/www/html/wp-content/mu-plugins/dg-gemeenschap.php:ro
   - ./wordpress/dg-inhoud.php:/var/www/html/wp-content/mu-plugins/dg-inhoud.php:ro
   - ./wordpress/dg-dashboard.php:/var/www/html/wp-content/mu-plugins/dg-dashboard.php:ro
@@ -97,6 +104,8 @@ services:
       ORG_KLEUR: ${ORG_KLEUR:-}
       ORG_KLEUR_DONKER: ${ORG_KLEUR_DONKER:-}
       ORG_KLEUR_LINK: ${ORG_KLEUR_LINK:-}
+      ORG_ACCENT: ${ORG_ACCENT:-}
+      ORG_ACCENT_DONKER: ${ORG_ACCENT_DONKER:-}
     volumes:
       - ./caddy:/etc/caddy:ro
       # Logo en icoon (organisatie.yml, huisstijl/), op elk adres onder /huisstijl/.
@@ -241,6 +250,7 @@ services:
     volumes:
       - wphtml:/var/www/html
       - ./wordpress/dg-platform.php:/var/www/html/wp-content/mu-plugins/dg-0-platform.php:ro
+      - ./huisstijl:/var/www/huisstijl:ro
       - ./wordpress/dg-gemeenschap.php:/var/www/html/wp-content/mu-plugins/dg-gemeenschap.php:ro
       - ./wordpress/dg-inhoud.php:/var/www/html/wp-content/mu-plugins/dg-inhoud.php:ro
       - ./wordpress/dg-dashboard.php:/var/www/html/wp-content/mu-plugins/dg-dashboard.php:ro

@@ -6,9 +6,11 @@
  * dg_module( 'agenda' ) zegt of een module aan staat. Zonder DG_MODULES (een
  * server van vóór 0.23.0) staat alles aan.
  *
- * dg_org( 'naam' ) geeft naam, kort, organisatie, soort, omschrijving, welkom, kleur,
- * kleur_donker en kleur_link. De kleuren staan ook als CSS-variabelen op elke
- * pagina (--dg-kleur, --dg-kleur-donker, --dg-kleur-link), voor elk thema.
+ * dg_org( 'naam' ) geeft naam, kort, organisatie, soort, omschrijving, welkom,
+ * slogan, over, voet en de kleuren: kleur, kleur_donker, kleur_link, accent en
+ * accent_donker. De kleuren staan ook als CSS-variabelen op elke pagina
+ * (--dg-kleur, --dg-kleur-donker, --dg-kleur-link, --dg-accent,
+ * --dg-accent-donker), voor elk thema.
  *
  * @package Gemeenschapsplatform
  */
@@ -42,6 +44,14 @@ function dg_org( string $sleutel ): string {
 			return dg_org( 'omschrijving' );
 		case 'soort':
 			return 'organisatie';
+		case 'over':
+			return dg_org( 'omschrijving' );
+		case 'voet':
+			return 'software open source onder de EUPL';
+		case 'accent':
+			return '#0066cc';
+		case 'accent_donker':
+			return '#003c7a';
 		case 'kleur':
 			return '#14478f';
 		case 'kleur_donker':
@@ -62,6 +72,12 @@ function dg_soort( bool $hoofdletter = false ): string {
 	return $hoofdletter ? mb_strtoupper( mb_substr( $soort, 0, 1 ) ) . mb_substr( $soort, 1 ) : $soort;
 }
 
+/** Een bestand uit huisstijl/ (logo.png, icoon.png) op de server, of '' als het er niet is. */
+function dg_huisstijl_pad( string $naam ): string {
+	$pad = '/var/www/huisstijl/' . basename( $naam );
+	return is_file( $pad ) ? $pad : '';
+}
+
 /** Het adres van een subdomein van deze site: dg_subdomein( 'kennis' ) = https://kennis.<domein>/. */
 function dg_subdomein( string $naam, string $pad = '' ): string {
 	return 'https://' . $naam . '.' . wp_parse_url( home_url(), PHP_URL_HOST ) . '/' . ltrim( $pad, '/' );
@@ -72,7 +88,7 @@ add_action(
 	'wp_head',
 	static function () {
 		$k = array();
-		foreach ( array( 'kleur', 'kleur_donker', 'kleur_link' ) as $s ) {
+		foreach ( array( 'kleur', 'kleur_donker', 'kleur_link', 'accent', 'accent_donker' ) as $s ) {
 			$v = dg_org( $s );
 			if ( preg_match( '/^#[0-9a-fA-F]{6}$/', $v ) ) {
 				$k[] = '--dg-' . str_replace( '_', '-', $s ) . ':' . $v;
