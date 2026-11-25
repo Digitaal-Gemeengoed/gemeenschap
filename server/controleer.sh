@@ -22,8 +22,31 @@ done
 for adres in $(controle_adressen "$DOMEIN"); do
   code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "https://$adres")"
   if [[ "$code" =~ ^[23] ]]; then ok "https://$adres ($code)"
-  elif [ "$code" = 401 ] && grep -q '^DG_TOEGANG=dicht' .env; then ok "https://$adres (afgeschermd met wachtwoord)"
   else waarschuw "https://$adres antwoordt niet goed ($code)"; fi
+done
+
+# "Niet veilig" bij sommige bezoekers komt bijna altijd door DNS: een naam die
+# (ook) naar een andere server wijst, vaak een AAAA-record (IPv6) dat de
+# registrar standaard aanmaakt. Wie IPv6 heeft, komt dan ergens anders uit, met
+# een verkeerd certificaat of zonder https.
+meld "DNS en https"
+IP4="$(publiek_ip)"
+IP6="$(ip -6 route get 2606:4700:4700::1111 2>/dev/null | awk '{for (i = 1; i < NF; i++) if ($i == "src") { print $(i + 1); exit }}')"
+for naam in "$DOMEIN" "www.$DOMEIN" "aanmelden.$DOMEIN" "projecten.$DOMEIN" "forum.$DOMEIN" "chat.$DOMEIN" "matrix.$DOMEIN"; do
+  a="$(getent ahostsv4 "$naam" | awk '{print $1}' | sort -u | tr '\n' ' ')"
+  aaaa="$(python3 -I -c 'import socket,sys
+try: print(" ".join(sorted({i[4][0] for i in socket.getaddrinfo(sys.argv[1], 443, socket.AF_INET6)})))
+except Exception: pass' "$naam")"
+  if [ -z "$a" ]; then waarschuw "$naam: geen A-record"; continue; fi
+  [ "${a% }" = "$IP4" ] || waarschuw "$naam wijst (ook) naar ${a% } in plaats van alleen $IP4; haal de andere A-records weg"
+  if [ -n "$aaaa" ] && [ "$aaaa" != "$IP6" ]; then
+    waarschuw "$naam heeft een AAAA-record ($aaaa) dat niet naar deze server wijst; bezoekers met IPv6 krijgen dan 'niet veilig'. Haal het weg bij de registrar${IP6:+ of zet het op $IP6}"
+  fi
+  code="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 8 --resolve "$naam:80:127.0.0.1" "http://$naam/")"
+  case "$code" in
+    30[178]\ https://*) ok "$naam: A klopt, http stuurt door naar https" ;;
+    *) waarschuw "http://$naam stuurt niet door naar https ($code)" ;;
+  esac
 done
 
 meld "Uitrol vanuit GitHub"

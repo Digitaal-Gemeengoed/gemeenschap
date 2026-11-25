@@ -2,38 +2,6 @@
 # Nodig in DNS: A-records (of CNAME's) naar deze server voor <domein>,
 # www.<domein>, aanmelden.<domein>, projecten.<domein> en forum.<domein>.
 
-# Afschermen met gebruikersnaam en wachtwoord zolang het platform niet openbaar
-# is: server/afschermen.sh zet DG_TOEGANG op dicht of open. Verkeer van de
-# server zelf en uit de containers (privé-adressen) hoeft niet in te loggen,
-# zodat de controles, wp-cron en het inloggen via Keycloak blijven werken.
-#
-# Na het inloggen krijgt de browser een cookie (dg_toegang, voor het domein en
-# alle subdomeinen); met dat cookie hoeft het niet opnieuw. Nodig voor
-# programma's die zelf een Authorization-kop sturen: de kennisbank (Wiki.js)
-# stuurt na het inloggen "Bearer <token>" mee, waardoor de browser het
-# wachtwoord van de afscherming niet meer kan meesturen. Eén keer inloggen
-# geldt zo ook voor alle subdomeinen. De waarde (DG_TOEGANG_COOKIE) is
-# geheim en wisselt bij elk nieuw wachtwoord.
-(toegang-open) {
-}
-
-(toegang-dicht) {
-	@extern {
-		not remote_ip private_ranges
-		not header Cookie *dg_toegang={$DG_TOEGANG_COOKIE}*
-		# Een uitnodiging om lid te worden (wordpress/dg-uitnodigen.php): de site
-		# controleert de sleutel en zet dan zelf het cookie.
-		not path /uitnodiging/* /.well-known/matrix/*
-	}
-	# In deze volgorde: het cookie alleen na een geslaagde aanmelding.
-	route {
-		basic_auth @extern {
-			{$DG_TOEGANG_GEBRUIKER} {$DG_TOEGANG_HASH}
-		}
-		header @extern +Set-Cookie "dg_toegang={$DG_TOEGANG_COOKIE}; Domain={$DOMEIN}; Path=/; Max-Age=2592000; Secure; HttpOnly; SameSite=Lax"
-	}
-}
-
 (beveiliging) {
 	header {
 		Strict-Transport-Security "max-age=31536000"
@@ -46,7 +14,6 @@
 
 {$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	encode zstd gzip
 	# XML-RPC is een bekend doelwit en hier niet nodig.
 	@xmlrpc path /xmlrpc.php
@@ -67,9 +34,8 @@
 }
 
 # --- Chat (Matrix) ----------------------------------------------------------------
-# De chatserver en het inloggen staan buiten de afscherming: een app op de
-# telefoon kan het wachtwoord daarvan niet invullen. Wie wil inloggen, heeft
-# altijd een account in Keycloak nodig (MAS stuurt door naar aanmelden.).
+# Wie wil inloggen, heeft altijd een account in Keycloak nodig (MAS stuurt
+# door naar aanmelden.).
 matrix.{$DOMEIN} {
 	import beveiliging
 	# Inloggen, uitloggen en tokens vernieuwen: naar MAS.
@@ -86,10 +52,9 @@ matrix-auth.{$DOMEIN} {
 	reverse_proxy mas:8080
 }
 
-# Element Web: de chat in de browser (achter de afscherming als die aan staat).
+# Element Web: de chat in de browser.
 chat.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	reverse_proxy element:80
 }
 
@@ -103,7 +68,6 @@ forum.{$DOMEIN} {
 
 aanmelden.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	# Het beheerscherm van Keycloak niet naar buiten; via de SSH-tunnel (README.md, Beheer op de server).
 	@beheer path /admin*
 	respond @beheer "Niet beschikbaar" 404
@@ -114,7 +78,6 @@ aanmelden.{$DOMEIN} {
 
 projecten.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	encode zstd gzip
 	reverse_proxy redmine:3000
 }
@@ -123,7 +86,6 @@ projecten.{$DOMEIN} {
 # mogen niets en worden naar het inloggen via Keycloak gestuurd).
 kennis.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	encode zstd gzip
 	reverse_proxy wiki:3000
 }
@@ -132,29 +94,16 @@ kennis.{$DOMEIN} {
 # Alleen voor leden: dat regelt de dienst zelf (inloggen via Keycloak).
 documenten.{$DOMEIN} {
 	import beveiliging
-	# WebDAV (/dav/: app-wachtwoord; /o/: tijdelijke link) logt zelf in met
-	# Basic; de afscherming met wachtwoord zou daar dubbel op zitten (een
-	# programma kan maar één wachtwoord sturen). Daarom buiten de afscherming.
 	# Alleen voor WordPress op het interne netwerk (documenten/intern.go).
 	@intern path /intern/*
-	handle @intern {
-		respond 404
-	}
-	@webdav path /dav /dav/* /o/*
-	handle @webdav {
-		reverse_proxy documenten:8080
-	}
-	handle {
-		import toegang-{$DG_TOEGANG:open}
-		reverse_proxy documenten:8080
-	}
+	respond @intern 404
+	reverse_proxy documenten:8080
 }
 
 # Beheer (dg-beheer): voor de beheerders van het platform en de kerngroep.
 # De dienst controleert zelf wie er binnenkomt (Keycloak).
 beheer.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	reverse_proxy beheer:8080
 }
 
@@ -163,7 +112,6 @@ beheer.{$DOMEIN} {
 # Keycloak wie er is; wie niet is ingelogd, gaat eerst naar het inloggen.
 architectuur.{$DOMEIN} {
 	import beveiliging
-	import toegang-{$DG_TOEGANG:open}
 	encode zstd gzip
 	handle /oauth2/* {
 		reverse_proxy oauth2-proxy:4180

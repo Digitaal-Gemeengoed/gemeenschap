@@ -3,7 +3,7 @@
 # eenmalig het account waarmee Documenten de kamers bijhoudt. Wordt gelezen
 # door bijwerken.sh (functies matrix_bestanden en matrix_bot).
 #
-#   matrix.<domein>       Synapse (de chatserver), buiten de afscherming
+#   matrix.<domein>       Synapse (de chatserver)
 #   matrix-auth.<domein>  MAS: inloggen, alleen via Keycloak
 #   chat.<domein>         Element Web (de chat in de browser)
 #
@@ -199,7 +199,7 @@ upstream_oauth2:
       human_name: "je DGG-account"
       issuer: "$realm"
       # De browser gaat naar het openbare adres; tokens haalt MAS binnen het
-      # Docker-netwerk op (de afscherming houdt verkeer van buiten tegen).
+      # Docker-netwerk op.
       discovery_mode: disabled
       authorization_endpoint: "$realm/protocol/openid-connect/auth"
       token_endpoint: "$intern/token"

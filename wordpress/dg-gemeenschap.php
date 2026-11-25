@@ -738,6 +738,77 @@ add_action(
 );
 
 // ---------------------------------------------------------------------------
+// Een mail bij een nieuw persoonlijk bericht (BuddyPress). De meeste leden zijn
+// niet elke dag op het platform. De melding van BuddyPress zelf werkt hier niet
+// (zijn mailsjablonen staan niet in de database) en zou Engels zijn; daarom een
+// eigen, gewone tekstmail. Wie dat niet wil, zet de mail voor nieuwe berichten
+// uit bij de e-mailinstellingen van BuddyPress op het eigen profiel (de link
+// staat onder elke mail; dezelfde instelling die BuddyPress zelf gebruikt).
+// Per gesprek hooguit één mail per DG_PB_MAIL_PAUZE, zodat een levendig
+// gesprek geen stroom mails geeft.
+// ---------------------------------------------------------------------------
+
+const DG_PB_MAIL_PAUZE = 30 * MINUTE_IN_SECONDS;
+
+add_action(
+	'bp_init',
+	static function () {
+		remove_action( 'messages_message_sent', 'messages_notification_new_message', 10 );
+	},
+	20
+);
+
+add_action( 'messages_message_sent', 'dg_pb_mail', 20 );
+
+function dg_pb_mail( $bericht ): void {
+	if ( ! is_object( $bericht ) || empty( $bericht->recipients ) || ! function_exists( 'bp_get_message_thread_view_link' ) ) {
+		return;
+	}
+	$afzender = (int) $bericht->sender_id;
+	$van      = $afzender ? bp_core_get_user_displayname( $afzender ) : '';
+	$van      = '' !== $van ? $van : 'Digitaal GemeenGoed';
+	$draad    = (int) $bericht->thread_id;
+	$onderwerp = trim( wp_specialchars_decode( wp_strip_all_tags( (string) $bericht->subject ), ENT_QUOTES ) );
+	$tekst    = trim( preg_replace( '/[ \t]+/', ' ', wp_specialchars_decode( wp_strip_all_tags( str_ireplace( array( '<br>', '<br />', '</p>' ), "\n", (string) $bericht->message ) ), ENT_QUOTES ) ) );
+	$uittreksel = mb_strlen( $tekst ) > 400 ? rtrim( mb_substr( $tekst, 0, 400 ) ) . ' …' : $tekst;
+	$nu       = time();
+
+	foreach ( $bericht->recipients as $ontvanger ) {
+		$uid = (int) ( is_object( $ontvanger ) ? $ontvanger->user_id : $ontvanger );
+		if ( ! $uid || $uid === $afzender ) {
+			continue;
+		}
+		if ( 'no' === bp_get_user_meta( $uid, 'notification_messages_new_message', true ) ) {
+			continue;
+		}
+		$lid = get_userdata( $uid );
+		if ( ! $lid || ! is_email( $lid->user_email ) || ( function_exists( 'bp_is_user_spammer' ) && bp_is_user_spammer( $uid ) ) ) {
+			continue;
+		}
+		$gemaild = (array) get_user_meta( $uid, 'dg_pb_gemaild', true );
+		if ( isset( $gemaild[ $draad ] ) && $nu - (int) $gemaild[ $draad ] < DG_PB_MAIL_PAUZE ) {
+			continue;
+		}
+		$link = bp_get_message_thread_view_link( $draad, $uid );
+		$uit  = function_exists( 'bp_members_get_user_url' )
+			? bp_members_get_user_url( $uid, bp_members_get_path_chunks( array( bp_get_settings_slug(), 'notifications' ) ) )
+			: trailingslashit( bp_core_get_user_domain( $uid ) ) . bp_get_settings_slug() . '/notifications/';
+		$mail = "Hallo {$lid->display_name},\n\n"
+			. "{$van} heeft je een bericht gestuurd op Digitaal GemeenGoed"
+			. ( '' !== $onderwerp ? ": \"{$onderwerp}\"" : '' ) . ".\n\n"
+			. ( '' !== $uittreksel ? $uittreksel . "\n\n" : '' )
+			. "Lezen en antwoorden (een antwoord op deze mail komt niet aan):\n{$link}\n\n"
+			. "--\nJe krijgt deze mail omdat iemand je een persoonlijk bericht stuurde. Liever geen mail? Zet het uit:\n{$uit}\n";
+		if ( wp_mail( $lid->user_email, "Nieuw bericht van {$van}", $mail ) ) {
+			$gemaild[ $draad ] = $nu;
+			// Alleen de recente gesprekken bewaren.
+			$gemaild = array_filter( $gemaild, static fn( $t ) => $nu - (int) $t < DAY_IN_SECONDS );
+			update_user_meta( $uid, 'dg_pb_gemaild', $gemaild );
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
 // Berichten namens Documenten (documenten.<domein>): bij het delen van een map
 // of document krijgt de ontvanger een bericht in BuddyPress (en daarmee de
 // gewone e-mailmelding). Alleen voor de dienst zelf: met het gedeelde geheim

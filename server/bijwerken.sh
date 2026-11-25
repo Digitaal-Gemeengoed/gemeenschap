@@ -41,8 +41,8 @@ vul_env_aan .env GARAGE_RPC_GEHEIM "$(geheim 32)"
 vul_env_aan .env GARAGE_SLEUTEL "GK$(geheim 12)"
 vul_env_aan .env GARAGE_GEHEIM "$(geheim 32)"
 vul_env_aan .env DOC_BERICHT_GEHEIM "$(geheim 32)"
-# Sinds 0.12.1: het cookie van de afscherming (caddy/Caddyfile).
-vul_env_aan .env DG_TOEGANG_COOKIE "$(geheim 32)"
+# Sinds 0.22.0: geen afscherming met wachtwoord meer; de oude regels weg.
+sed -i '/^DG_TOEGANG/d' .env
 # Sinds 0.17.0: chat (Matrix).
 vul_env_aan .env MATRIX_DB_WACHTWOORD "$(geheim 24)"
 vul_env_aan .env MAS_DB_WACHTWOORD "$(geheim 24)"

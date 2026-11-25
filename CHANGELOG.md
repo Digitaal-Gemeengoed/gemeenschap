@@ -2,6 +2,12 @@
 
 ## Nog niet uitgebracht
 
+## 0.22.0 — 2026-11-25
+
+- **Openbaar: geen wachtwoord meer voor de site.** De afscherming met één gebruikersnaam en wachtwoord (HTTP Basic Auth in Caddy) is weg, net als `server/afschermen.sh` en het cookie `dg_toegang`. De oude regels `DG_TOEGANG…` gaan bij het bijwerken vanzelf uit `.env`. Wat alleen voor leden is (kennisbank, documenten, architectuur, besloten berichten), blijft dat via het inloggen met Keycloak.
+- **Mail bij een persoonlijk bericht.** Wie een bericht krijgt, krijgt nu ook een mail: wie het stuurt, het onderwerp, het begin van de tekst en een link naar het gesprek. Per gesprek hooguit één mail per half uur. Uitzetten kan bij de e-mailinstellingen op het eigen profiel (link onder elke mail). De melding van BuddyPress zelf deed niets: zijn mailsjablonen stonden niet in de database.
+- **Controle op DNS en https.** `server/controleer.sh` kijkt nu per naam of het A-record alleen naar deze server wijst, of er een AAAA-record (IPv6) is dat ergens anders heen wijst, en of `http://` doorstuurt naar `https://`. Een verkeerd AAAA-record is de gebruikelijke oorzaak van "niet veilig" bij sommige bezoekers.
+
 ## 0.21.1 — 2026-11-20
 
 - **Nieuwe plek op GitHub.** De repo's staan nu in de organisatie [Digitaal-Gemeengoed](https://github.com/Digitaal-Gemeengoed). De standaardadressen in `compose.yml` (`DG_INHOUD_REPO`) en `server/lib.sh` (`DG_REPO`), de links op de pagina's en in de startinhoud van de wiki wijzen daarheen, en de startpagina heet nu [digitaal-gemeengoed.github.io](https://digitaal-gemeengoed.github.io/).

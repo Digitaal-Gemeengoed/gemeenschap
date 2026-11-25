@@ -109,7 +109,7 @@ wiki/                       de kennisbank: image (vertalingen, logo, offline), i
 documenten/                 dg-documenten (Go): register, bestandsbeheerder, Garage-instellingen, ONTWERP.md
 beheer/                     dg-beheer (Go): leden en rollen, organisaties, platform, ONTWERP.md
 architectuur/repos.txt      de architectuurmodellen (één repo per project)
-caddy/Caddyfile             de adressen, certificaten, afscherming
+caddy/Caddyfile             de adressen en certificaten
 compose.yml                 alle containers
 server/                     installeren, bijwerken, uitrollen, back-up, controleren
 ```
@@ -266,9 +266,7 @@ Teams vaak niet mag). **Synapse** is de server, **MAS** doet het inloggen
 `/var/lib/dg-gemeenschap/matrix`.
 
 - **DNS**: `chat`, `matrix` en `matrix-auth` als A-record naar de server.
-  `matrix.` en `matrix-auth.` staan buiten de afscherming (een app kan het
-  wachtwoord daarvan niet invullen); inloggen vraagt altijd een account in
-  Keycloak. `/.well-known/matrix/*` op het hoofddomein vertelt apps waar de
+  Inloggen vraagt altijd een account in Keycloak. `/.well-known/matrix/*` op het hoofddomein vertelt apps waar de
   server staat.
 - **Kamers**: Documenten houdt ze bij (`documenten/chat.go`), met het account
   `@documenten:<domein>`: *Algemeen* (iedereen), *Coöperatie* (members en
@@ -407,7 +405,6 @@ stap 12): `inrichten.sh` (kies 4), `ssh-afsluiten.sh`, `installeer.sh`.
 | Nu meteen uitrollen | `sudo /opt/gemeenschap/server/uitrol.sh` |
 | Pauzeren / hervatten | `sudo touch /var/lib/dg-gemeenschap/pauze` / `sudo rm …/pauze` |
 | Na een wijziging in `.env` | `sudo /opt/gemeenschap/server/bijwerken.sh` |
-| Afschermen met wachtwoord (zolang het niet openbaar is) | `sudo /opt/gemeenschap/server/afschermen.sh aan` / `… uit` |
 | Keycloak-beheer | `ssh -L 8080:127.0.0.1:8080 beheer@<server>`, dan `http://localhost:8080/admin` |
 
 Met `UITROL_MELDEN=<adres>` in `.env` krijg je een mail bij elke nieuwe

@@ -169,7 +169,6 @@ bewust niet: dat is openbaar maken, en vraagt een eigen besluit.
   herstart zijn ze weg. Eén exemplaar van de dienst, dus dat is genoeg.
 - Verwijderen via WebDAV vraagt Beheren, behalve een document dat je zelf
   minder dan tien minuten geleden aanmaakte (tijdelijke bestanden).
-- Caddy laat `/dav/` en `/o/` buiten de afscherming met wachtwoord.
 
 ## Ruimtes, opslag en beheer (0.11)
 

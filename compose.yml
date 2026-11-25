@@ -44,8 +44,6 @@ x-wordpress-omgeving: &wordpress-omgeving
   # Redmine voor het dashboard (dg-dashboard.php): intern voor de API, publiek voor links.
   DG_REDMINE_INTERN: http://redmine:3000
   DG_REDMINE_URL: https://projecten.${DOMEIN}
-  # Uitnodigingen (dg-uitnodigen.php): een geldige uitnodiging opent de afscherming.
-  DG_TOEGANG_COOKIE: ${DG_TOEGANG_COOKIE:-}
   # Projectvoorstellen (dg-projectvoorstel.php): het account "site" in Redmine, geen beheerder.
   DG_REDMINE_SITE_KEY: ${REDMINE_SITE_API_KEY:?}
   # Inloggen via Keycloak (gelezen door wp-content/mu-plugins/dg-gemeenschap.php).
@@ -80,12 +78,6 @@ services:
       - "443:443"
     environment:
       DOMEIN: ${DOMEIN:?}
-      # Afschermen met gebruikersnaam en wachtwoord: server/afschermen.sh.
-      DG_TOEGANG: ${DG_TOEGANG:-open}
-      DG_TOEGANG_GEBRUIKER: ${DG_TOEGANG_GEBRUIKER:-}
-      DG_TOEGANG_HASH: ${DG_TOEGANG_HASH:-}
-      # Geheim: na het inloggen hoeft het niet opnieuw (zie caddy/Caddyfile).
-      DG_TOEGANG_COOKIE: ${DG_TOEGANG_COOKIE:?}
     volumes:
       - ./caddy:/etc/caddy:ro
       - caddydata:/data

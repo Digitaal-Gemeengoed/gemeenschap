@@ -40,7 +40,7 @@ Omvang: tientallen contacten na een jaar, honderden na drie jaar. De verantwoord
 | `architectuur.digitaalgemeengoed.nl` | De HTML-rapporten van de architectuurmodellen, alleen voor leden |
 | `forum.digitaalgemeengoed.nl` | Doorverwijzing naar `digitaalgemeengoed.nl/forum/` |
 
-Zolang het platform niet openbaar is, kan alles achter één gebruikersnaam en wachtwoord (`server/afschermen.sh aan`, HTTP Basic Auth in Caddy).
+Het platform is openbaar; wat alleen voor leden is, regelt elk onderdeel zelf met het inloggen via Keycloak. (Tot 0.22.0 kon alles achter één wachtwoord in Caddy; dat is weg.)
 
 ## Keycloak, realm `gemeenschap`
 

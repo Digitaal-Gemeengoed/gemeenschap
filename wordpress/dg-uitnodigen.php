@@ -12,10 +12,8 @@
  * lid, dan blijft alleen vastgelegd wie wie uitnodigde (voor de kerngroep), en
  * dat ook maar een jaar. De persoonlijke tekst wordt niet bewaard.
  *
- * Afscherming (zolang de site een wachtwoord heeft, caddy/Caddyfile): Caddy laat
- * /uitnodiging/<sleutel> door. Is de sleutel geldig, dan zet de site het
- * cookie van de afscherming (DG_TOEGANG_COOKIE) en stuurt door naar het
- * aanmelden; zonder geldige sleutel blijft alles dicht.
+ * /uitnodiging/<sleutel>: is de sleutel geldig, dan stuurt de site door naar het
+ * aanmelden.
  *
  * @package DigitaalGemeenGoed
  */
@@ -274,22 +272,6 @@ add_action(
 		$rij   = $wpdb->get_row( $wpdb->prepare( "SELECT id, status, verloopt FROM $tabel WHERE sleutel = %s", hash( 'sha256', $m[1] ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( ! $rij || strtotime( $rij['verloopt'] . ' UTC' ) < time() ) {
 			dg_uit_niet_geldig();
-		}
-		// Langs de afscherming (als die aan staat): hetzelfde cookie als na het wachtwoord.
-		$cookie = (string) getenv( 'DG_TOEGANG_COOKIE' );
-		if ( '' !== $cookie ) {
-			setcookie(
-				'dg_toegang',
-				$cookie,
-				array(
-					'expires'  => time() + 30 * DAY_IN_SECONDS,
-					'path'     => '/',
-					'domain'   => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
-					'secure'   => is_ssl(),
-					'httponly' => true,
-					'samesite' => 'Lax',
-				)
-			);
 		}
 		nocache_headers();
 		wp_safe_redirect( is_user_logged_in() ? home_url( '/' ) : home_url( '/lid-worden/' ) );
