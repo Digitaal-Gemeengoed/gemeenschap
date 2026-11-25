@@ -310,6 +310,39 @@ if ("home", taal) in paden and os.path.isfile(os.path.join(START, "home.md")):
                      "t": [x.strip() for x in kop.get("labels", "").split(",") if x.strip()]})["pages"]["update"]
         resultaat(r, "startpagina bijwerken")
         gemaakt += 1
+# Correcties: een zin uit de startinhoud die niet meer klopt. Staat de oude zin er
+# nog letterlijk, dan vervangen we alleen die zin; wat leden verder aan de pagina
+# veranderden, blijft staan. (0.23.0: Redmine is alleen voor ingelogde leden.)
+CORRECTIES = {
+    "algemeen/platform": [
+        ("| meldingen, wensen, roadmap, fase per project | **openbaar** |",
+         "| meldingen, wensen, roadmap, fase per project | ingelogde leden (wat een project is en doet: openbaar op de site) |")],
+    "algemeen/meldingen-en-wensen": [
+        ("**Meldingen zijn openbaar.** Zet er geen persoonsgegevens",
+         "**Alle leden zien je melding.** Zet er geen persoonsgegevens")],
+    "algemeen/privacy-en-beveiliging": [
+        ("| meldingen en reacties | Redmine | **iedereen**, met je naam |",
+         "| meldingen en reacties | Redmine | ingelogde leden, met je naam |"),
+        ("meld haar **niet** in Redmine (dat is openbaar), maar per mail",
+         "meld haar **niet** in Redmine (dat zien alle leden), maar per mail")],
+    "algemeen/faq": [
+        ("**Waarom zijn meldingen in Redmine openbaar?**  \nZodat iedereen kan zien waaraan we werken, ook wie (nog) geen lid is. Zet er daarom geen persoonsgegevens of vertrouwelijke informatie in.",
+         "**Wie ziet de meldingen in Redmine?**  \nAlle ingelogde leden. Wat een project is en doet, staat openbaar op de projectpagina van de site; meldingen, planning en discussie zijn voor leden. Zet er geen persoonsgegevens of vertrouwelijke informatie in.")],
+}
+for x in gq("{ pages { list(limit: 5000) { id path locale } } }", JWT)["pages"]["list"]:
+    if x["locale"] != taal or x["path"] not in CORRECTIES:
+        continue
+    pagina = gq("query($id: Int!) { pages { single(id: $id) { content title description tags { tag } } } }", JWT, {"id": x["id"]})["pages"]["single"]
+    inhoud = pagina["content"]
+    for oud, nieuw in CORRECTIES[x["path"]]:
+        inhoud = inhoud.replace(oud, nieuw)
+    if inhoud != pagina["content"]:
+        r = gq("""mutation($id: Int!, $c: String!, $d: String!, $t: [String]!, $ti: String!) { pages { update(id: $id, content: $c,
+                 description: $d, tags: $t, title: $ti, isPublished: true) { responseResult { succeeded message } } } }""",
+               JWT, {"id": x["id"], "c": inhoud, "d": pagina["description"] or "", "ti": pagina["title"],
+                     "t": [t["tag"] for t in pagina["tags"] or []]})["pages"]["update"]
+        resultaat(r, f"pagina {x['path']} bijwerken")
+
 if os.path.isdir(START):
     for map_, _, bestanden in sorted(os.walk(START)):
         for naam in sorted(bestanden):

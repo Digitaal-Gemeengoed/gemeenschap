@@ -47,8 +47,8 @@ Mail naar info@digitaalgemeengoed.nl; de kerngroep verwijdert je account. Je ber
 **Waar stel ik een vraag, en waar meld ik een fout?**  
 Een vraag of idee in het forum. Een fout of wens die duidelijk is, in Redmine. Zie [Het platform](/algemeen/platform) voor wat waar hoort.
 
-**Waarom zijn meldingen in Redmine openbaar?**  
-Zodat iedereen kan zien waaraan we werken, ook wie (nog) geen lid is. Zet er daarom geen persoonsgegevens of vertrouwelijke informatie in.
+**Wie ziet de meldingen in Redmine?**  
+Alle ingelogde leden. Wat een project is en doet, staat openbaar op de projectpagina van de site; meldingen, planning en discussie zijn voor leden. Zet er geen persoonsgegevens of vertrouwelijke informatie in.
 
 **Waarom is de kennisbank alleen voor leden?**  
 Om te beginnen kunnen leden zo vrij ervaringen delen. Later kan het netwerk besluiten delen ervan openbaar te maken.

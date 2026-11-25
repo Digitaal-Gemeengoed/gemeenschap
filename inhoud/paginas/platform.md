@@ -51,6 +51,6 @@ Inzicht in de status van hosting, onderhoud, ondersteuning en prestaties van de 
 
 ## Wie ziet wat
 
-De fora, het ledenoverzicht, de kennisbank, Documenten en de architectuurmodellen zijn alleen zichtbaar voor leden die zijn ingelogd; in Documenten bovendien alleen voor wie toegang heeft tot de ruimte, map of het document. Meldingen en de planning in Redmine zijn openbaar, zodat iedereen kan zien waar we aan werken.
+De fora, het ledenoverzicht, de kennisbank, Documenten en de architectuurmodellen zijn alleen zichtbaar voor leden die zijn ingelogd; in Documenten bovendien alleen voor wie toegang heeft tot de ruimte, map of het document. Meldingen en de planning in Redmine zijn er ook alleen voor ingelogde leden. Wat elk project is en doet, staat openbaar op de projectpagina van de site.
 
 [dg_lid_worden]

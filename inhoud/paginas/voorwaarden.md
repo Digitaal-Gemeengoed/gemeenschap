@@ -30,7 +30,7 @@ De kerngroep modereert. Een bericht dat in strijd is met deze voorwaarden, kunne
 
 1. Code, documentatie en andere bijdragen aan de software vallen onder de licentie van het project waaraan je bijdraagt, meestal de [EUPL 1.2](https://interoperable-europe.ec.europa.eu/collection/eupl).
 2. Berichten in de fora en meldingen in Redmine blijven van jou. Je geeft ons en de andere leden toestemming ze te lezen, te citeren en te gebruiken voor de projecten van het netwerk.
-3. Meldingen en de planning in Redmine zijn **openbaar**, met je naam erbij. De fora en het ledenoverzicht zijn alleen zichtbaar voor ingelogde leden.
+3. Meldingen en de planning in Redmine, de fora en het ledenoverzicht zijn alleen zichtbaar voor ingelogde leden; bij meldingen staat je naam.
 
 ## Opzeggen
 

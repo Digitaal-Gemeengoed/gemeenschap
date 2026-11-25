@@ -24,7 +24,7 @@ Wil je gemeente zich verbinden aan het netwerk, meebeslissen over de prioriteite
 ## Wat je kunt doen
 
 1. **Meepraten in de fora.** Stel je voor in *Algemeen*, of begin een onderwerp in *Beheer*, *Development* of *Besluitvorming*.
-2. **Iets melden.** Zie je een fout of mis je iets? Maak een melding in [Redmine](https://projecten.digitaalgemeengoed.nl). Zet erin wat je deed, wat je verwachtte en wat er gebeurde. Zet er geen persoonsgegevens of vertrouwelijke informatie in: meldingen zijn openbaar.
+2. **Iets melden.** Zie je een fout of mis je iets? Maak een melding in [Redmine](https://projecten.digitaalgemeengoed.nl). Zet erin wat je deed, wat je verwachtte en wat er gebeurde. Je logt in met je account van de community. Zet er geen persoonsgegevens of vertrouwelijke informatie in: alle leden zien je meldingen.
 3. **Uitproberen bij je gemeente.** Wil je een oplossing proberen in je eigen omgeving? Laat het weten in het forum van het project.
 4. **Bijdragen aan de code.** De code staat op [GitHub](https://github.com/Digitaal-Gemeengoed). Een pull request is welkom; overleg bij iets groters eerst in het forum *Development*.
 5. **Deze site verbeteren.** Ook de pagina's van deze site staan op GitHub, in [Digitaal-Gemeengoed/gemeenschap](https://github.com/Digitaal-Gemeengoed/gemeenschap/tree/main/inhoud). Een taalfout of een betere uitleg mag je daar voorstellen.
